@@ -6,17 +6,17 @@ import (
 )
 
 type User struct {
-	UserID      uint64           `json:"userID"`
-	ClerkID     string           `json:"-"`
-	Username    string           `json:"username"`
-	Email       string           `json:"email"`
-	Birthday    o.NullString     `json:"birthday"`
-	Gender      o.NullString     `json:"gender"`
-	Country     o.NullString     `json:"country"`
-	City        o.NullString     `json:"city"`
-	Description o.NullString     `json:"description"`
-	UpdatedAt   string           `json:"-"`
-	CreatedAt   string           `json:"createdAt"`
+	UserID      uint64       `json:"userID"`
+	ClerkID     string       `json:"-"`
+	Username    string       `json:"username"`
+	Email       string       `json:"email"`
+	Birthday    o.NullString `json:"birthday"`
+	Gender      o.NullString `json:"gender"`
+	Country     o.NullString `json:"country"`
+	City        o.NullString `json:"city"`
+	Description o.NullString `json:"description"`
+	UpdatedAt   string       `json:"-"`
+	CreatedAt   string       `json:"createdAt"`
 }
 
 func GetUserByClerkID(clerkID string) (user User, err error) {

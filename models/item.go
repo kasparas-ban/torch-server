@@ -8,18 +8,18 @@ import (
 )
 
 type Item struct {
-	ItemID     int64           `json:"itemID"`
-	UserID     int64           `json:"-"`
-	Title      string          `json:"title"`
-	Progress   float32         `json:"progress"`
-	Type       string          `json:"type"`
-	TargetDate o.NullString    `json:"targetDate"`
-	Priority   o.NullString    `json:"priority"`
-	Duration   o.NullInt       `json:"duration"`
-	ParentID   o.NullUint64    `json:"parentID"`
-	TimeSpent  int             `json:"timeSpent"`
-	TimeLeft   int             `json:"timeLeft"`
-	CreatedAt  string          `json:"createdAt"`
+	ItemID     int64        `json:"itemID"`
+	UserID     int64        `json:"-"`
+	Title      string       `json:"title"`
+	Progress   float32      `json:"progress"`
+	Type       string       `json:"type"`
+	TargetDate o.NullString `json:"targetDate"`
+	Priority   o.NullString `json:"priority"`
+	Duration   o.NullInt    `json:"duration"`
+	ParentID   o.NullUint64 `json:"parentID"`
+	TimeSpent  int          `json:"timeSpent"`
+	TimeLeft   int          `json:"timeLeft"`
+	CreatedAt  string       `json:"createdAt"`
 }
 
 func GetAllItemsByUser(userID int64) (items []Item, err error) {
@@ -38,7 +38,7 @@ func AddItem(item Item) (err error) {
 		if err != nil {
 			return err
 		}
-    
+
 		if item.ParentID.IsValid == true {
 			err = tx.Exec(`
 				INSERT INTO item_relations (user_id, parent_id, child_id) VALUES (?, ?, ?)
@@ -47,7 +47,7 @@ func AddItem(item Item) (err error) {
 				return err
 			}
 		}
-	
+
 		return nil
 	})
 
@@ -62,14 +62,14 @@ func RemoveItem(userID, itemID int64) (err error) {
 		if err != nil {
 			return err
 		}
-    
+
 		err = tx.Exec(`
 			DELETE FROM item_relations WHERE user_id = ? AND (parent_id = ? OR child_id = ?)
 		`, userID, itemID, itemID).Error
 		if err != nil {
 			return err
 		}
-	
+
 		return nil
 	})
 
@@ -94,7 +94,7 @@ func UpdateItem(item Item) (err error) {
 		if err != nil {
 			return err
 		}
-    
+
 		if item.ParentID.IsValid == false {
 			err = tx.Exec(`
 				DELETE FROM item_relations WHERE user_id = ? AND (parent_id = ? OR child_id = ?)
@@ -110,7 +110,7 @@ func UpdateItem(item Item) (err error) {
 				return err
 			}
 		}
-	
+
 		return nil
 	})
 

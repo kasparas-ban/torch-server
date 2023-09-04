@@ -24,7 +24,7 @@ func Init() {
 }
 
 func ConnectDB(dataSourceName string) (*gorm.DB, error) {
-	db, err := gorm.Open(mysql.Open(dataSourceName), &gorm.Config{ SkipDefaultTransaction: true })
+	db, err := gorm.Open(mysql.Open(dataSourceName), &gorm.Config{SkipDefaultTransaction: true})
 	if err != nil {
 		return nil, err
 	}

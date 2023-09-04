@@ -23,7 +23,7 @@ func (ni *NullInt) Scan(value interface{}) error {
 
 func (ni NullInt) Value() (driver.Value, error) {
 	if !ni.IsValid {
-			return nil, nil
+		return nil, nil
 	}
 	return ni.Val, nil
 }
@@ -34,7 +34,7 @@ func (ni *NullInt) Set(val interface{}) {
 
 func (ni NullInt) MarshalJSON() ([]byte, error) {
 	if !ni.IsValid {
-			return []byte(`null`), nil
+		return []byte(`null`), nil
 	}
 
 	return []byte(strconv.FormatInt(int64(ni.Val), 10)), nil
@@ -42,14 +42,14 @@ func (ni NullInt) MarshalJSON() ([]byte, error) {
 
 func (ni *NullInt) UnmarshalJSON(data []byte) error {
 	if data == nil || string(data) == `null` {
-			ni.IsValid = false
-			return nil
+		ni.IsValid = false
+		return nil
 	}
 
 	val, err := strconv.ParseInt(string(data), 10, 64)
 	if err != nil {
-			ni.IsValid = false
-			return err
+		ni.IsValid = false
+		return err
 	}
 
 	ni.Val = int(val)
@@ -60,7 +60,7 @@ func (ni *NullInt) UnmarshalJSON(data []byte) error {
 
 func (ni NullInt) String() string {
 	if !ni.IsValid {
-			return `<nil>`
+		return `<nil>`
 	}
 
 	return strconv.FormatInt(int64(ni.Val), 10)
