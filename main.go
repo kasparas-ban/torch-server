@@ -9,7 +9,6 @@ import (
 	c "torch/torch-server/controllers"
 	"torch/torch-server/db"
 
-	uuid "github.com/google/uuid"
 	"github.com/joho/godotenv"
 
 	"github.com/gin-gonic/gin"
@@ -17,7 +16,7 @@ import (
 
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "http://localhost")
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173")
 		c.Writer.Header().Set("Access-Control-Max-Age", "86400")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, UPDATE")
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "X-Requested-With, Content-Type, Origin, Authorization, Accept, Client-Security-Token, Accept-Encoding, x-access-token")
@@ -30,14 +29,6 @@ func CORSMiddleware() gin.HandlerFunc {
 		} else {
 			c.Next()
 		}
-	}
-}
-
-func RequestIDMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		uuid := uuid.New()
-		c.Writer.Header().Set("X-Request-Id", uuid.String())
-		c.Next()
 	}
 }
 
@@ -57,12 +48,8 @@ func main() {
 
 	r := gin.Default()
 
-	//Custom form validator
-	// binding.Validator = new(forms.DefaultValidator)
-
 	r.Use(CORSMiddleware())
-	// r.Use(auth.AuthMiddleware())
-	// r.Use(RequestIDMiddleware())
+	r.Use(auth.AuthMiddleware())
 
 	api := r.Group("/api")
 	{
@@ -70,22 +57,11 @@ func main() {
 		api.GET("/user/:userID", c.GetUserInfo)
 
 		api.GET("/items/:userID", c.GetAllItems)
-		api.POST("/add-item/:userID", c.AddItem)
-		api.PUT("/update-item/:userID", c.UpdateItem)
-
-		/*** START Article ***/
-		// article := new(controllers.ArticleController)
-
-		// v1.POST("/article", TokenAuthMiddleware(), article.Create)
-		// v1.GET("/articles", TokenAuthMiddleware(), article.All)
-		// v1.GET("/article/:id", TokenAuthMiddleware(), article.One)
-		// v1.PUT("/article/:id", TokenAuthMiddleware(), article.Update)
-		// v1.DELETE("/article/:id", TokenAuthMiddleware(), article.Delete)
+		api.POST("/add-item", c.AddItem)
+		api.DELETE("/remove-item", c.RemoveItem)
+		api.PUT("/update-item", c.UpdateItem)
+		api.PUT("/update-item-progress", c.UpdateItemProgress)
 	}
-
-	// r.NoRoute(func(c *gin.Context) {
-	// 	c.HTML(404, "404.html", gin.H{})
-	// })
 
 	port := os.Getenv("PORT")
 

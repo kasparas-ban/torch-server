@@ -8,8 +8,8 @@ import (
 )
 
 type Item struct {
-	ItemID     int64        `json:"itemID"`
-	UserID     int64        `json:"-"`
+	ItemID     uint64        `json:"itemID"`
+	UserID     uint64        `json:"-"`
 	Title      string       `json:"title"`
 	Progress   float32      `json:"progress"`
 	Type       string       `json:"type"`
@@ -54,7 +54,7 @@ func AddItem(item Item) (err error) {
 	return err
 }
 
-func RemoveItem(userID, itemID int64) (err error) {
+func RemoveItem(userID, itemID uint64) (err error) {
 	err = db.GetDB().Transaction(func(tx *gorm.DB) error {
 		err = tx.Exec(`
 			DELETE FROM items WHERE user_id = ? AND item_id = ?
@@ -114,5 +114,18 @@ func UpdateItem(item Item) (err error) {
 		return nil
 	})
 
+	return err
+}
+
+func UpdateItemProgress(userID, itemID uint64, timeSpent int) (err error) {
+	err = db.GetDB().Raw(`
+		UPDATE items
+		SET
+			progress = (time_spent + ?) / (time_left - ?),
+			time_spent = time_spent + ?,
+			time_left = time_left - ?
+		WHERE
+			user_id = ? AND item_id = ?
+	`, timeSpent, timeSpent, timeSpent, timeSpent, userID, itemID).Error
 	return err
 }

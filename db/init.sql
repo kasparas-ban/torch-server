@@ -350,3 +350,12 @@ INSERT INTO `items` (`user_id`, `title`, `type`, `target_date`, `priority`, `dur
 INSERT INTO `item_relations` (`user_id`, `parent_id`, `child_id`) VALUES (1, 2, 1);
 INSERT INTO `item_relations` (`user_id`, `parent_id`, `child_id`) VALUES (1, 2, 3);
 INSERT INTO `item_relations` (`user_id`, `parent_id`, `child_id`) VALUES (1, 4, 2);
+
+
+UPDATE items
+SET
+  progress = (time_spent + 1000) / (time_left - 1000),
+  time_spent = time_spent + 1000,
+  time_left = time_left - 1000
+WHERE
+  user_id = 1 AND item_id = 1;
