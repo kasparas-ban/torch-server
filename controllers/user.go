@@ -1,53 +1,17 @@
 package controllers
 
 import (
-	"errors"
 	"net/http"
+	a "torch/torch-server/auth"
 	m "torch/torch-server/models"
 
 	"github.com/gin-gonic/gin"
 )
 
-type UserPost struct {
-	ClerkID string
-}
-
-func GetUserInfoByClerkID(c *gin.Context) {
-	clerkID := c.Param("clerkID")
-	if clerkID == "" {
-		c.JSON(
-			http.StatusBadRequest,
-			gin.H{"error": errors.New("No clerkID found")},
-		)
-		c.Abort()
-		return
-	}
-
-	user, err := m.GetUserByClerkID(clerkID)
-	if err != nil {
-		c.JSON(
-			http.StatusInternalServerError,
-			gin.H{"error": err.Error()},
-		)
-		c.Abort()
-		return
-	}
-
-	c.JSON(http.StatusOK, user)
-}
-
 func GetUserInfo(c *gin.Context) {
-	userID := c.Param("userID")
-	if userID == "" {
-		c.JSON(
-			http.StatusBadRequest,
-			gin.H{"error": errors.New("No userID found")},
-		)
-		c.Abort()
-		return
-	}
+	userID := a.GetUserID(c)
 
-	user, err := m.GetUserByUserID(userID)
+	user, err := m.GetUserInfo(userID)
 	if err != nil {
 		c.JSON(
 			http.StatusInternalServerError,

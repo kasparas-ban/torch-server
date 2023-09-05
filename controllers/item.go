@@ -3,7 +3,7 @@ package controllers
 import (
 	"errors"
 	"net/http"
-	"strconv"
+	a "torch/torch-server/auth"
 	m "torch/torch-server/models"
 	o "torch/torch-server/optional"
 
@@ -20,27 +20,16 @@ type NewItemReq struct {
 }
 
 type RemoveItemReq struct {
-	userID uint64
 	itemID uint64
 }
 
 type UpdateItemProgressReq struct {
-	userID uint64
 	itemID uint64
 	timeSpent int
 }
 
 func GetAllItems(c *gin.Context) {
-	userIDParam := c.Param("userID")
-	userID, err := strconv.ParseInt(userIDParam, 10, 64)
-	if err != nil {
-		c.JSON(
-			http.StatusBadRequest,
-			gin.H{"error": errors.New("Could not find userID parameter")},
-		)
-		c.Abort()
-		return
-	}
+	userID := a.GetUserID(c)
 
 	items, err := m.GetAllItemsByUser(userID)
 	if err != nil {
@@ -56,7 +45,9 @@ func GetAllItems(c *gin.Context) {
 }
 
 func AddItem(c *gin.Context) {
-	var newItem m.Item
+	userID := a.GetUserID(c)
+
+	var newItem m.AddItemReq
 	if err := c.BindJSON(&newItem); err != nil {
 		c.JSON(
 			http.StatusBadRequest,
@@ -66,7 +57,7 @@ func AddItem(c *gin.Context) {
 		return
 	}
 
-	err := m.AddItem(newItem)
+	err := m.AddItem(newItem, userID)
 	if err != nil {
 		c.JSON(
 			http.StatusInternalServerError,
@@ -80,6 +71,8 @@ func AddItem(c *gin.Context) {
 }
 
 func RemoveItem(c *gin.Context) {
+	userID := a.GetUserID(c)
+
 	var reqBody RemoveItemReq
 	if err := c.BindJSON(&reqBody); err != nil {
 		c.JSON(
@@ -90,7 +83,7 @@ func RemoveItem(c *gin.Context) {
 		return
 	}
 	
-	err := m.RemoveItem(reqBody.userID, reqBody.itemID)
+	err := m.RemoveItem(userID, reqBody.itemID)
 	if err != nil {
 		c.JSON(
 			http.StatusInternalServerError,
@@ -104,7 +97,9 @@ func RemoveItem(c *gin.Context) {
 }
 
 func UpdateItem(c *gin.Context) {
-	var newItem m.Item
+	userID := a.GetUserID(c)
+	
+	var newItem m.UpdateItemReq
 	if err := c.BindJSON(&newItem); err != nil {
 		c.JSON(
 			http.StatusBadRequest,
@@ -114,7 +109,7 @@ func UpdateItem(c *gin.Context) {
 		return
 	}
 
-	err := m.UpdateItem(newItem)
+	err := m.UpdateItem(newItem, userID)
 	if err != nil {
 		c.JSON(
 			http.StatusInternalServerError,
@@ -128,6 +123,8 @@ func UpdateItem(c *gin.Context) {
 }
 
 func UpdateItemProgress(c *gin.Context) {
+	userID := a.GetUserID(c)
+
 	var reqBody UpdateItemProgressReq
 	if err := c.BindJSON(&reqBody); err != nil {
 		c.JSON(
@@ -138,7 +135,7 @@ func UpdateItemProgress(c *gin.Context) {
 		return
 	}
 
-	err := m.UpdateItemProgress(reqBody.userID, reqBody.itemID, reqBody.timeSpent)
+	err := m.UpdateItemProgress(userID, reqBody.itemID, reqBody.timeSpent)
 	if err != nil {
 		c.JSON(
 			http.StatusInternalServerError,

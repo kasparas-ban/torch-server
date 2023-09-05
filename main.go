@@ -53,10 +53,9 @@ func main() {
 
 	api := r.Group("/api")
 	{
-		api.GET("/full-profile/:clerkID", c.GetUserInfoByClerkID)
-		api.GET("/user/:userID", c.GetUserInfo)
+		api.GET("/user-info", c.GetUserInfo)
 
-		api.GET("/items/:userID", c.GetAllItems)
+		api.GET("/items", c.GetAllItems)
 		api.POST("/add-item", c.AddItem)
 		api.DELETE("/remove-item", c.RemoveItem)
 		api.PUT("/update-item", c.UpdateItem)

@@ -19,17 +19,7 @@ type User struct {
 	CreatedAt   string       `json:"createdAt"`
 }
 
-func GetUserByClerkID(clerkID string) (user User, err error) {
-	db.GetDB().Raw(`
-		SELECT u.user_id, u.clerk_id, u.username, u.email, u.birthday, u.gender, c.country, u.city, u.description, u.created_at 
-		FROM users u
-		LEFT JOIN countries c ON u.country_id = c.country_id
-		WHERE u.clerk_id = ? LIMIT 1
-	`, clerkID).Scan(&user)
-	return user, err
-}
-
-func GetUserByUserID(userID string) (user User, err error) {
+func GetUserInfo(userID uint64) (user User, err error) {
 	db.GetDB().Raw(`
 		SELECT u.user_id, u.clerk_id, u.username, u.email, u.birthday, u.gender, c.country, u.city, u.description, u.created_at 
 		FROM users u
