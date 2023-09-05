@@ -29,7 +29,15 @@ type UpdateItemProgressReq struct {
 }
 
 func GetAllItems(c *gin.Context) {
-	userID := a.GetUserID(c)
+	userID := c.GetUint64("userID")
+	if userID == 0 {
+		c.JSON(
+			http.StatusBadRequest,
+			gin.H{"error": "Could not find userID"},
+		)
+		c.Abort()
+		return
+	}
 
 	items, err := m.GetAllItemsByUser(userID)
 	if err != nil {
@@ -98,7 +106,7 @@ func RemoveItem(c *gin.Context) {
 
 func UpdateItem(c *gin.Context) {
 	userID := a.GetUserID(c)
-	
+
 	var newItem m.UpdateItemReq
 	if err := c.BindJSON(&newItem); err != nil {
 		c.JSON(

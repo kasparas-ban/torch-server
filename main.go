@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -9,9 +8,8 @@ import (
 	c "torch/torch-server/controllers"
 	"torch/torch-server/db"
 
-	"github.com/joho/godotenv"
-
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 func CORSMiddleware() gin.HandlerFunc {
@@ -24,7 +22,6 @@ func CORSMiddleware() gin.HandlerFunc {
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 
 		if c.Request.Method == "OPTIONS" {
-			fmt.Println("OPTIONS")
 			c.AbortWithStatus(200)
 		} else {
 			c.Next()
