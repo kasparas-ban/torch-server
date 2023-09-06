@@ -53,7 +53,7 @@ type UpdateItemReq struct {
 
 func GetAllItemsByUser(userID uint64) (items []Item, err error) {
 	err = db.GetDB().Raw(`
-		SELECT item_id, title, progress, type, target_date, priority, duration, rec_times, rec_period, rec_progress, time_spent, time_left, created_at
+		SELECT item_id, title, progress, type, target_date, priority, duration, rec_times, rec_period, rec_progress, parent_id, time_spent, time_left, created_at
 		FROM items WHERE user_id = ?
 	`, userID).Scan(&items).Error
 	return items, err

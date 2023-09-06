@@ -2,6 +2,8 @@ package optional
 
 import (
 	"database/sql/driver"
+	"encoding/json"
+	"fmt"
 	"strconv"
 )
 
@@ -17,7 +19,17 @@ func NewNullUint(val interface{}) NullUint {
 }
 
 func (ni *NullUint) Scan(value interface{}) error {
-	ni.Val, ni.IsValid = value.(uint)
+	fmt.Printf("\n value %v %v \n", ni.Val, value)
+	data, ok := value.([]uint8)
+	if !ok {
+		return nil
+	}
+
+	val, err := strconv.ParseUint(string(data), 10, 64)
+	if err == nil {
+		ni.Val = uint(val)
+		ni.IsValid = true
+	}
 	return nil
 }
 
@@ -37,7 +49,7 @@ func (ni NullUint) MarshalJSON() ([]byte, error) {
 		return []byte(`null`), nil
 	}
 
-	return []byte(strconv.FormatUint(uint64(ni.Val), 10)), nil
+	return json.Marshal(ni.Val)
 }
 
 func (ni *NullUint) UnmarshalJSON(data []byte) error {
