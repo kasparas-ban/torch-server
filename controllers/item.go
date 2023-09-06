@@ -15,7 +15,8 @@ type NewItemReq struct {
 	Type       string
 	TargetDate o.NullString
 	Priority   o.NullString
-	Duration   o.NullInt
+	Duration   o.NullUint
+	Recurring  o.Recurring
 	ParentID   o.NullUint64
 }
 
@@ -24,7 +25,7 @@ type RemoveItemReq struct {
 }
 
 type UpdateItemProgressReq struct {
-	itemID uint64
+	itemID    uint64
 	timeSpent int
 }
 
@@ -90,7 +91,7 @@ func RemoveItem(c *gin.Context) {
 		c.Abort()
 		return
 	}
-	
+
 	err := m.RemoveItem(userID, reqBody.itemID)
 	if err != nil {
 		c.JSON(

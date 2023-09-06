@@ -294,10 +294,13 @@ CREATE TABLE IF NOT EXISTS `items` (
   `type` ENUM('DREAM', 'GOAL', 'TASK') NOT NULL,
   `target_date` DATE,
   `priority` ENUM('LOW', 'MEDIUM', 'HIGH'),
-  `duration` INT,
-  `parent_id` BIGINT,
-  `time_spent` INT DEFAULT 0,
-  `time_left` INT,
+  `duration` INT UNSIGNED,
+  `rec_times` INT UNSIGNED,
+  `rec_period` ENUM('WEEK', 'DAY', 'MONTH'),
+  `rec_progress` INT UNSIGNED,
+  `parent_id` BIGINT UNSIGNED,
+  `time_spent` INT UNSIGNED DEFAULT 0,
+  `time_left` INT UNSIGNED,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   INDEX `idx_user_id` (`user_id`)
 )
@@ -319,38 +322,51 @@ COLLATE = utf8mb4_unicode_ci
 ;
 
 
--- Sample data
-INSERT INTO `users` (`username`) VALUES ('kaspis245');
+-- ======= Sample data ==========
 
-ALTER TABLE `users`
-MODIFY COLUMN `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
-
-DELETE FROM `users` WHERE user_id=1; 
-
-UPDATE `users` SET `gender` = 'MALE' WHERE `user_id` = 1;
-
-ALTER TABLE `users`
-ADD COLUMN `clerk_id` VARCHAR(50) NOT NULL AFTER `user_id`;
-
-ALTER TABLE `users`
-ADD INDEX `idx_clerk_id` (`clerk_id`);
-
-ALTER TABLE `items`
-ADD COLUMN `parent` BIGINT AFTER `duration`;
-
+-- Users table
 
 INSERT INTO `users` (`username`, `email`, `clerk_id`) VALUES ('kaspis245', 'kaspis245@gmail.com', 'user_2Ui3QUrAix2lslvsWBmvGeNBKtu');
 
+-- Items table
 
-INSERT INTO `items` (`user_id`, `title`, `type`, `target_date`, `priority`, `duration`, `time_left`) VALUES (1, 'Learn programming', 'DREAM', NULL, 'HIGH', 50000, 50000);
-INSERT INTO `items` (`user_id`, `title`, `type`, `target_date`, `priority`, `duration`, `time_left`) VALUES (1, 'Make a Todo/Timer app', 'GOAL', NULL, 'HIGH', 50000, 50000);
-INSERT INTO `items` (`user_id`, `title`, `type`, `target_date`, `priority`, `duration`, `time_left`) VALUES (1, 'Make a Figma design sketch', 'TASK', NULL, 'MEDIUM', 36000, 36000);
-INSERT INTO `items` (`user_id`, `title`, `type`, `target_date`, `priority`, `duration`, `time_left`) VALUES (1, 'Code MVP frontend', 'TASK', NULL, 'MEDIUM', 14000, 14000);
+INSERT INTO `items` (`user_id`, `title`, `type`, `priority`) VALUES (1, 'Learn Spanish', 'DREAM', 'HIGH');
+INSERT INTO `items` (`user_id`, `title`, `type`) VALUES (1, 'Get fit', 'DREAM');
+INSERT INTO `items` (`user_id`, `title`, `type`) VALUES (1, 'Get good at math', 'DREAM');
 
-INSERT INTO `item_relations` (`user_id`, `parent_id`, `child_id`) VALUES (1, 2, 1);
-INSERT INTO `item_relations` (`user_id`, `parent_id`, `child_id`) VALUES (1, 2, 3);
-INSERT INTO `item_relations` (`user_id`, `parent_id`, `child_id`) VALUES (1, 4, 2);
+INSERT INTO `items` (`user_id`, `title`, `type`, `target_date`, `priority`) VALUES (1, 'Make a todo/timer app', 'GOAL', '2023-12-01', 'HIGH');
+INSERT INTO `items` (`user_id`, `title`, `type`, `priority`) VALUES (1, 'Learn chess', 'GOAL', 'LOW');
+INSERT INTO `items` (`user_id`, `title`, `type`, `parent_id`) VALUES (1, 'Learn Spanish vocabulary', 'GOAL', 1);
+INSERT INTO `item_relations` (`user_id`, `parent_id`, `child_id`) VALUES (1, 1, 6);
+INSERT INTO `items` (`user_id`, `title`, `type`, `parent_id`) VALUES (1, 'Learn Spanish grammar', 'GOAL', 1);
+INSERT INTO `item_relations` (`user_id`, `parent_id`, `child_id`) VALUES (1, 1, 7);
+INSERT INTO `items` (`user_id`, `title`, `type`, `parent_id`) VALUES (1, 'Spanish language comprehension', 'GOAL', 1);
+INSERT INTO `item_relations` (`user_id`, `parent_id`, `child_id`) VALUES (1, 1, 8);
+INSERT INTO `items` (`user_id`, `title`, `type`, `parent_id`) VALUES (1, 'Spanish writing', 'GOAL', 1);
+INSERT INTO `item_relations` (`user_id`, `parent_id`, `child_id`) VALUES (1, 1, 9);
+INSERT INTO `items` (`user_id`, `title`, `type`, `parent_id`) VALUES (1, 'Build muscle', 'GOAL', 2);
+INSERT INTO `item_relations` (`user_id`, `parent_id`, `child_id`) VALUES (1, 2, 10);
+INSERT INTO `items` (`user_id`, `title`, `type`, `parent_id`, `target_date`) VALUES (1, 'Learn Linear Algebra', 'GOAL', 3, '2023-12-01');
+INSERT INTO `item_relations` (`user_id`, `parent_id`, `child_id`) VALUES (1, 3, 11);
+INSERT INTO `items` (`user_id`, `title`, `type`, `parent_id`) VALUES (1, 'Learn Calculus', 'GOAL', 3);
+INSERT INTO `item_relations` (`user_id`, `parent_id`, `child_id`) VALUES (1, 3, 12);
+INSERT INTO `items` (`user_id`, `title`, `type`) VALUES (1, 'Read "Demons" by Dostoevsky', 'GOAL');
+INSERT INTO `items` (`user_id`, `title`, `type`) VALUES (1, 'Read "The Shape of Space"', 'GOAL');
 
+INSERT INTO `items` (`user_id`, `title`, `type`, `duration`, `target_date`, `priority`, `parent_id`) VALUES (1, 'Make a Figma design sketch', 'TASK', 100800, '2023-10-30', 'MEDIUM', 4);
+INSERT INTO `item_relations` (`user_id`, `parent_id`, `child_id`) VALUES (1, 4, 15);
+INSERT INTO `items` (`user_id`, `title`, `type`, `duration`, `target_date`, `priority`, `parent_id`) VALUES (1, 'Code MVP frontend', 'TASK', 144000, '2023-10-30', 'HIGH', 4);
+INSERT INTO `item_relations` (`user_id`, `parent_id`, `child_id`) VALUES (1, 4, 16);
+INSERT INTO `items` (`user_id`, `title`, `type`, `duration`, `target_date`, `priority`, `parent_id`) VALUES (1, 'Make MVP backend', 'TASK', 108000, '2023-10-30', 'HIGH', 4);
+INSERT INTO `item_relations` (`user_id`, `parent_id`, `child_id`) VALUES (1, 4, 17);
+INSERT INTO `items` (`user_id`, `title`, `type`, `duration`, `parent_id`) VALUES (1, 'Learn common Spanish greeting phrases', 'TASK', 36000, 6);
+INSERT INTO `item_relations` (`user_id`, `parent_id`, `child_id`) VALUES (1, 6, 18);
+INSERT INTO `items` (`user_id`, `title`, `type`, `duration`, `parent_id`) VALUES (1, 'Memorize a list of essential words', 'TASK', 36000, 6);
+INSERT INTO `item_relations` (`user_id`, `parent_id`, `child_id`) VALUES (1, 6, 19);
+INSERT INTO `items` (`user_id`, `title`, `type`, `duration`, `parent_id`) VALUES (1, 'Learn Spanish pronunciation', 'TASK', 36000, 6);
+INSERT INTO `item_relations` (`user_id`, `parent_id`, `child_id`) VALUES (1, 6, 20);
+INSERT INTO `items` (`user_id`, `title`, `type`, `parent_id`, `rec_times`, `rec_period`, `rec_progress`) VALUES (1, 'Do weight lifting', 'TASK', 10, 3, 'WEEK', 2);
+INSERT INTO `item_relations` (`user_id`, `parent_id`, `child_id`) VALUES (1, 10, 21);
 
 UPDATE items
 SET

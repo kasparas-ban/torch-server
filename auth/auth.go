@@ -18,7 +18,7 @@ var client clerk.Client
 
 const (
 	userID_metadata = "user_id"
-	userID_context = "userID"
+	userID_context  = "userID"
 )
 
 func Init() {
@@ -103,7 +103,7 @@ func GetUserID(c *gin.Context) uint64 {
 	return userID
 }
 
-func addUserID(c *gin.Context, user *clerk.User) error {	
+func addUserID(c *gin.Context, user *clerk.User) error {
 	userInfo, err := models.GetUserInfoByClerkID(user.ID)
 	if err != nil {
 		return err

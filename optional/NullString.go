@@ -2,6 +2,7 @@ package optional
 
 import (
 	"database/sql/driver"
+	"encoding/json"
 )
 
 type NullString struct {
@@ -16,7 +17,13 @@ func NewNullString(val interface{}) NullString {
 }
 
 func (ni *NullString) Scan(value interface{}) error {
-	ni.Val, ni.IsValid = value.(string)
+	if val, ok := value.([]uint8); ok {
+		ni.Val = string(val)
+		ni.IsValid = true
+		return nil
+	}
+
+	ni.IsValid = false
 	return nil
 }
 
@@ -36,7 +43,7 @@ func (ni NullString) MarshalJSON() ([]byte, error) {
 		return []byte(`null`), nil
 	}
 
-	return []byte(ni.Val), nil
+	return json.Marshal(ni.Val)
 }
 
 func (ni *NullString) UnmarshalJSON(data []byte) error {

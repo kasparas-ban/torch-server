@@ -8,18 +8,25 @@ import (
 )
 
 type Item struct {
-	ItemID     uint64        `json:"itemID"`
-	UserID     uint64        `json:"-"`
+	ItemID     uint64       `json:"itemID"`
+	UserID     uint64       `json:"-"`
 	Title      string       `json:"title"`
 	Progress   float32      `json:"progress"`
 	Type       string       `json:"type"`
 	TargetDate o.NullString `json:"targetDate"`
 	Priority   o.NullString `json:"priority"`
-	Duration   o.NullInt    `json:"duration"`
+	Duration   o.NullUint   `json:"duration"`
+	Recurring  Recurring    `gorm:"embedded" json:"recurring"`
 	ParentID   o.NullUint64 `json:"parentID"`
-	TimeSpent  int          `json:"timeSpent"`
-	TimeLeft   int          `json:"timeLeft"`
+	TimeSpent  uint         `json:"timeSpent"`
+	TimeLeft   uint         `json:"timeLeft"`
 	CreatedAt  string       `json:"createdAt"`
+}
+
+type Recurring struct {
+	Times    uint   `gorm:"column:rec_times" json:"times"`
+	Period   string `gorm:"column:rec_period" json:"period"`
+	Progress uint   `gorm:"column:rec_progress" json:"progress"`
 }
 
 type AddItemReq struct {
@@ -27,26 +34,26 @@ type AddItemReq struct {
 	Type       string       `json:"type"`
 	TargetDate o.NullString `json:"targetDate"`
 	Priority   o.NullString `json:"priority"`
-	Duration   o.NullInt    `json:"duration"`
+	Duration   o.NullUint   `json:"duration"`
 	ParentID   o.NullUint64 `json:"parentID"`
 }
 
 type UpdateItemReq struct {
-	ItemID     uint64        `json:"itemID"`
+	ItemID     uint64       `json:"itemID"`
 	Title      string       `json:"title"`
 	Progress   float32      `json:"progress"`
 	Type       string       `json:"type"`
 	TargetDate o.NullString `json:"targetDate"`
 	Priority   o.NullString `json:"priority"`
-	Duration   o.NullInt    `json:"duration"`
+	Duration   o.NullUint   `json:"duration"`
 	ParentID   o.NullUint64 `json:"parentID"`
-	TimeSpent  int          `json:"timeSpent"`
-	TimeLeft   int          `json:"timeLeft"`
+	TimeSpent  uint         `json:"timeSpent"`
+	TimeLeft   uint         `json:"timeLeft"`
 }
 
 func GetAllItemsByUser(userID uint64) (items []Item, err error) {
 	err = db.GetDB().Raw(`
-		SELECT item_id, title, progress, type, target_date, priority, duration, time_spent, time_left, created_at
+		SELECT item_id, title, progress, type, target_date, priority, duration, rec_times, rec_period, rec_progress, time_spent, time_left, created_at
 		FROM items WHERE user_id = ?
 	`, userID).Scan(&items).Error
 	return items, err
@@ -54,6 +61,7 @@ func GetAllItemsByUser(userID uint64) (items []Item, err error) {
 
 func AddItem(item AddItemReq, userID uint64) (err error) {
 	err = db.GetDB().Transaction(func(tx *gorm.DB) error {
+		// Add item into the items table
 		err = tx.Exec(`
 			INSERT INTO items (user_id, title, type, target_date, priority, duration, parent) VALUES (?, ?, ?, NULL, ?, ?, ?)
 		`, userID, item.Title, item.Type, item.Priority, item.Duration, item.ParentID).Error
@@ -62,6 +70,7 @@ func AddItem(item AddItemReq, userID uint64) (err error) {
 		}
 
 		if item.ParentID.IsValid == true {
+			// Add item to the relations table
 			err = tx.Exec(`
 				INSERT INTO item_relations (user_id, parent_id, child_id) VALUES (?, ?, LAST_INSERT_ID())
 			`, userID, item.ParentID).Error
@@ -78,6 +87,7 @@ func AddItem(item AddItemReq, userID uint64) (err error) {
 
 func RemoveItem(userID, itemID uint64) (err error) {
 	err = db.GetDB().Transaction(func(tx *gorm.DB) error {
+		// Remove item from the items table
 		err = tx.Exec(`
 			DELETE FROM items WHERE user_id = ? AND item_id = ?
 		`, userID, itemID).Error
@@ -85,6 +95,7 @@ func RemoveItem(userID, itemID uint64) (err error) {
 			return err
 		}
 
+		// Remove all relationships with the item
 		err = tx.Exec(`
 			DELETE FROM item_relations WHERE user_id = ? AND (parent_id = ? OR child_id = ?)
 		`, userID, itemID, itemID).Error
@@ -100,6 +111,7 @@ func RemoveItem(userID, itemID uint64) (err error) {
 
 func UpdateItem(item UpdateItemReq, userID uint64) (err error) {
 	err = db.GetDB().Transaction(func(tx *gorm.DB) error {
+		// Update item in the items table
 		err = tx.Exec(`
 			UPDATE items
 				title = ?, 
@@ -118,13 +130,15 @@ func UpdateItem(item UpdateItemReq, userID uint64) (err error) {
 		}
 
 		if item.ParentID.IsValid == false {
+			// Remove from relations table where child is the item
 			err = tx.Exec(`
-				DELETE FROM item_relations WHERE user_id = ? AND (parent_id = ? OR child_id = ?)
-			`, userID, item.ItemID, item.ItemID).Error
+				DELETE FROM item_relations WHERE user_id = ? AND child_id = ?
+			`, userID, item.ItemID).Error
 			if err != nil {
 				return err
 			}
 		} else {
+			// Update relations table where child is the item
 			err = tx.Exec(`
 				UPDATE item_relations SET parent_id = ? WHERE user_id = ? AND child_id = ?
 			`, item.ParentID, userID, item.ItemID).Error
