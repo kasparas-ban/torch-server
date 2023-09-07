@@ -11,7 +11,6 @@ type Item struct {
 	ItemID     uint64       `json:"itemID"`
 	UserID     uint64       `json:"-"`
 	Title      string       `json:"title"`
-	Progress   float32      `json:"progress"`
 	Type       string       `json:"type"`
 	TargetDate o.NullString `json:"targetDate"`
 	Priority   o.NullString `json:"priority"`
@@ -40,7 +39,6 @@ type AddItemReq struct {
 type UpdateItemReq struct {
 	ItemID     uint64       `json:"itemID"`
 	Title      string       `json:"title"`
-	Progress   float32      `json:"progress"`
 	Type       string       `json:"type"`
 	TargetDate o.NullString `json:"targetDate"`
 	Priority   o.NullString `json:"priority"`
@@ -51,7 +49,7 @@ type UpdateItemReq struct {
 
 func GetAllItemsByUser(userID uint64) (items []Item, err error) {
 	err = db.GetDB().Raw(`
-		SELECT item_id, title, progress, type, target_date, priority, duration, rec_times, rec_period, rec_progress, parent_id, time_spent, created_at
+		SELECT item_id, title, type, target_date, priority, duration, rec_times, rec_period, rec_progress, parent_id, time_spent, created_at
 		FROM items WHERE user_id = ?
 	`, userID).Scan(&items).Error
 	return items, err
@@ -113,7 +111,6 @@ func UpdateItem(item UpdateItemReq, userID uint64) (err error) {
 		err = tx.Exec(`
 			UPDATE items
 				title = ?, 
-				progress = ?, 
 				target_date = ?,
 				priority = ?,
 				duration = ?,
@@ -121,7 +118,7 @@ func UpdateItem(item UpdateItemReq, userID uint64) (err error) {
 				time_spent = ?
 			WHERE
 				user_id = ? AND item_id = ?
-		`, item.Title, item.Progress, item.TargetDate, item.Priority, item.Duration, item.ParentID, item.TimeSpent, userID, item.ItemID).Error
+		`, item.Title, item.TargetDate, item.Priority, item.Duration, item.ParentID, item.TimeSpent, userID, item.ItemID).Error
 		if err != nil {
 			return err
 		}
@@ -154,7 +151,6 @@ func UpdateItemProgress(userID, itemID uint64, timeSpent int) (err error) {
 	err = db.GetDB().Raw(`
 		UPDATE items
 		SET
-			progress = (time_spent + ?) / duration,
 			time_spent = time_spent + ?
 		WHERE
 			user_id = ? AND item_id = ?

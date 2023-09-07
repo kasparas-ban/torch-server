@@ -290,16 +290,15 @@ CREATE TABLE IF NOT EXISTS `items` (
   `item_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `user_id` BIGINT UNSIGNED NOT NULL,
   `title` VARCHAR(255) NOT NULL,
-  `progress` DECIMAL(3, 3) DEFAULT 0,
   `type` ENUM('DREAM', 'GOAL', 'TASK') NOT NULL,
   `target_date` DATE,
   `priority` ENUM('LOW', 'MEDIUM', 'HIGH'),
   `duration` INT UNSIGNED,
+  `time_spent` INT UNSIGNED DEFAULT 0,
   `rec_times` INT UNSIGNED,
   `rec_period` ENUM('WEEK', 'DAY', 'MONTH'),
   `rec_progress` INT UNSIGNED,
   `parent_id` BIGINT UNSIGNED,
-  `time_spent` INT UNSIGNED DEFAULT 0,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   INDEX `idx_user_id` (`user_id`)
 )
@@ -369,7 +368,6 @@ INSERT INTO `item_relations` (`user_id`, `parent_id`, `child_id`) VALUES (1, 10,
 
 UPDATE items
 SET
-  progress = (time_spent + 1000) / duration,
-  time_spent = time_spent + 1000,
+  time_spent = time_spent + 1000
 WHERE
   user_id = 1 AND item_id = 1;
