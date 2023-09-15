@@ -3,7 +3,6 @@ package optional
 import (
 	"database/sql/driver"
 	"encoding/json"
-	"fmt"
 	"strconv"
 )
 
@@ -19,7 +18,6 @@ func NewNullUint(val interface{}) NullUint {
 }
 
 func (ni *NullUint) Scan(value interface{}) error {
-	fmt.Printf("\n value %v %v \n", ni.Val, value)
 	data, ok := value.([]uint8)
 	if !ok {
 		return nil

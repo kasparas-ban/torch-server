@@ -30,6 +30,7 @@ type Recurring struct {
 type AddItemReq struct {
 	Title      string       `json:"title"`
 	Type       string       `json:"type"`
+	Recurring  Recurring    `gorm:"embedded" json:"recurring,omitempty"`
 	TargetDate o.NullString `json:"targetDate"`
 	Priority   o.NullString `json:"priority"`
 	Duration   o.NullUint   `json:"duration"`
@@ -59,8 +60,8 @@ func AddItem(item AddItemReq, userID uint64) (err error) {
 	err = db.GetDB().Transaction(func(tx *gorm.DB) error {
 		// Add item into the items table
 		err = tx.Exec(`
-			INSERT INTO items (user_id, title, type, target_date, priority, duration, parent) VALUES (?, ?, ?, NULL, ?, ?, ?)
-		`, userID, item.Title, item.Type, item.Priority, item.Duration, item.ParentID, item.Duration).Error
+			INSERT INTO items (user_id, title, type, target_date, priority, duration, rec_times, rec_period, parent_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+		`, userID, item.Title, item.Type, item.TargetDate, item.Priority, item.Duration, item.Recurring.Times, item.Recurring.Period, item.ParentID).Error
 		if err != nil {
 			return err
 		}
