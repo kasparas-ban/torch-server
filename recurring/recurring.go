@@ -1,15 +1,16 @@
-package optional
+package recurring
 
 import (
 	"database/sql/driver"
 	"encoding/json"
 	"fmt"
+	"torch/torch-server/optional"
 )
 
 type Recurring struct {
-	Times    uint   `gorm:"column:rec_times" json:"times"`
-	Period   string `gorm:"column:rec_period" json:"period"`
-	Progress uint   `gorm:"column:rec_progress" json:"progress"`
+	Times    optional.NullUint   `gorm:"column:rec_times" json:"times"`
+	Period   optional.NullString `gorm:"column:rec_period" json:"period"`
+	Progress optional.NullUint   `gorm:"column:rec_progress" json:"progress"`
 }
 
 type NullRecurring struct {
@@ -49,7 +50,6 @@ func (ni *NullRecurring) Set(val interface{}) {
 }
 
 func (ni NullRecurring) MarshalJSON() ([]byte, error) {
-	fmt.Printf("\n MarshalJSON : %v \n", ni)
 	if !ni.IsValid {
 		return []byte(`null`), nil
 	}
@@ -79,5 +79,5 @@ func (ni NullRecurring) String() string {
 		return `<nil>`
 	}
 
-	return fmt.Sprintf("Times: %d, Period: %s, Progress: %d", ni.Val.Times, ni.Val.Period, ni.Val.Progress)
+	return fmt.Sprintf("Times: %v, Period: %v, Progress: %v", ni.Val.Times, ni.Val.Period, ni.Val.Progress)
 }

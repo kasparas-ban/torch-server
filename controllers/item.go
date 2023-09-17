@@ -6,6 +6,7 @@ import (
 	a "torch/torch-server/auth"
 	m "torch/torch-server/models"
 	o "torch/torch-server/optional"
+	r "torch/torch-server/recurring"
 
 	"github.com/gin-gonic/gin"
 )
@@ -16,7 +17,7 @@ type NewItemReq struct {
 	TargetDate o.NullString
 	Priority   o.NullString
 	Duration   o.NullUint
-	Recurring  o.Recurring
+	Recurring  r.Recurring
 	ParentID   o.NullUint64
 }
 
