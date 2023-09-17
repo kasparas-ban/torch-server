@@ -35,7 +35,7 @@ func (ni NullUint) Value() (driver.Value, error) {
 	if !ni.Valid {
 		return nil, nil
 	}
-	return ni.Val, nil
+	return int64(ni.Val), nil
 }
 
 func (ni *NullUint) Set(val interface{}) {
