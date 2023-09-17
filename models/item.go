@@ -8,17 +8,17 @@ import (
 )
 
 type Item struct {
-	ItemID     uint64       `json:"itemID"`
-	UserID     uint64       `json:"-"`
-	Title      string       `json:"title"`
-	Type       string       `json:"type"`
-	TargetDate o.NullString `json:"targetDate"`
-	Priority   o.NullString `json:"priority"`
-	Duration   o.NullUint   `json:"duration"`
-	Recurring  Recurring    `gorm:"embedded" json:"recurring"`
-	ParentID   o.NullUint64 `json:"parentID"`
-	TimeSpent  uint         `json:"timeSpent"`
-	CreatedAt  string       `json:"createdAt"`
+	ItemID     uint64          `json:"itemID"`
+	UserID     uint64          `json:"-"`
+	Title      string          `json:"title"`
+	Type       string          `json:"type"`
+	TargetDate o.NullString    `json:"targetDate"`
+	Priority   o.NullString    `json:"priority"`
+	Duration   o.NullUint      `json:"duration"`
+	Recurring  o.NullRecurring `gorm:"embedded" json:"recurring,omitempty"`
+	ParentID   o.NullUint64    `json:"parentID"`
+	TimeSpent  uint            `json:"timeSpent"`
+	CreatedAt  string          `json:"createdAt"`
 }
 
 type Recurring struct {
@@ -28,13 +28,13 @@ type Recurring struct {
 }
 
 type AddItemReq struct {
-	Title      string       `json:"title"`
-	Type       string       `json:"type"`
-	Recurring  Recurring    `gorm:"embedded" json:"recurring,omitempty"`
-	TargetDate o.NullString `json:"targetDate"`
-	Priority   o.NullString `json:"priority"`
-	Duration   o.NullUint   `json:"duration"`
-	ParentID   o.NullUint64 `json:"parentID"`
+	Title      string          `json:"title"`
+	Type       string          `json:"type"`
+	Recurring  o.NullRecurring `gorm:"embedded" json:"recurring,omitempty"`
+	TargetDate o.NullString    `json:"targetDate"`
+	Priority   o.NullString    `json:"priority"`
+	Duration   o.NullUint      `json:"duration"`
+	ParentID   o.NullUint64    `json:"parentID"`
 }
 
 type UpdateItemReq struct {
@@ -60,21 +60,21 @@ func AddItem(item AddItemReq, userID uint64) (err error) {
 	err = db.GetDB().Transaction(func(tx *gorm.DB) error {
 		// Add item into the items table
 		var rec_period *string
-		if item.Recurring.Period == "" {
+		if item.Recurring.Val.Period == "" {
 			rec_period = nil
 		} else {
-			// fmt.Println("attempt", item.Recurring.Period)
 			rec_period = new(string)
-			*rec_period = item.Recurring.Period
+			*rec_period = item.Recurring.Val.Period
 		}
+
 		err = tx.Exec(`
 			INSERT INTO items (user_id, title, type, target_date, priority, duration, rec_times, rec_period, parent_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-		`, userID, item.Title, item.Type, item.TargetDate, item.Priority, item.Duration, item.Recurring.Times, rec_period, item.ParentID).Error
+		`, userID, item.Title, item.Type, item.TargetDate, item.Priority, item.Duration, item.Recurring.Val.Times, rec_period, item.ParentID).Error
 		if err != nil {
 			return err
 		}
 
-		if item.ParentID.IsValid == true {
+		if item.ParentID.Valid == true {
 			// Add item to the relations table
 			err = tx.Exec(`
 				INSERT INTO item_relations (user_id, parent_id, child_id) VALUES (?, ?, LAST_INSERT_ID())
@@ -132,7 +132,7 @@ func UpdateItem(item UpdateItemReq, userID uint64) (err error) {
 			return err
 		}
 
-		if item.ParentID.IsValid == false {
+		if item.ParentID.Valid == false {
 			// Remove from relations table where child is the item
 			err = tx.Exec(`
 				DELETE FROM item_relations WHERE user_id = ? AND child_id = ?

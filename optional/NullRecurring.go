@@ -3,7 +3,6 @@ package optional
 import (
 	"database/sql/driver"
 	"encoding/json"
-	"errors"
 	"fmt"
 )
 
@@ -30,8 +29,6 @@ func (ni *NullRecurring) Scan(value interface{}) error {
 	if val, ok := value.(NullRecurring); ok {
 		fmt.Printf("\n Scan: %v %v \n", val.Val, val.IsValid)
 		ni.Val, ni.IsValid = val.Val, val.IsValid
-	} else {
-		return errors.New("Scan failed")
 	}
 
 	return nil
@@ -61,8 +58,6 @@ func (ni NullRecurring) MarshalJSON() ([]byte, error) {
 }
 
 func (ni *NullRecurring) UnmarshalJSON(data []byte) error {
-	fmt.Printf("\n UnmarshalJSON : %v \n", ni)
-
 	if data == nil || string(data) == `null` {
 		ni.IsValid = false
 		return nil

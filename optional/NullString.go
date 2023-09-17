@@ -52,7 +52,13 @@ func (ni *NullString) UnmarshalJSON(data []byte) error {
 		return nil
 	}
 
-	ni.Val = string(data)
+	var val string
+	if err := json.Unmarshal(data, &val); err != nil {
+		ni.IsValid = false
+		return nil
+	}
+
+	ni.Val = val
 	ni.IsValid = true
 
 	return nil

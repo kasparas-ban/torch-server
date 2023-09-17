@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	a "torch/torch-server/auth"
 	m "torch/torch-server/models"
@@ -66,8 +65,6 @@ func AddItem(c *gin.Context) {
 		c.Abort()
 		return
 	}
-
-	fmt.Println("ADD ITEM", newItem)
 
 	err := m.AddItem(newItem, userID)
 	if err != nil {
