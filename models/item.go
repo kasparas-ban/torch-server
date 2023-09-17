@@ -59,9 +59,17 @@ func GetAllItemsByUser(userID uint64) (items []Item, err error) {
 func AddItem(item AddItemReq, userID uint64) (err error) {
 	err = db.GetDB().Transaction(func(tx *gorm.DB) error {
 		// Add item into the items table
+		var rec_period *string
+		if item.Recurring.Period == "" {
+			rec_period = nil
+		} else {
+			// fmt.Println("attempt", item.Recurring.Period)
+			rec_period = new(string)
+			*rec_period = item.Recurring.Period
+		}
 		err = tx.Exec(`
 			INSERT INTO items (user_id, title, type, target_date, priority, duration, rec_times, rec_period, parent_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-		`, userID, item.Title, item.Type, item.TargetDate, item.Priority, item.Duration, item.Recurring.Times, item.Recurring.Period, item.ParentID).Error
+		`, userID, item.Title, item.Type, item.TargetDate, item.Priority, item.Duration, item.Recurring.Times, rec_period, item.ParentID).Error
 		if err != nil {
 			return err
 		}
