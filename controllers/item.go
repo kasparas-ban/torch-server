@@ -67,7 +67,7 @@ func AddItem(c *gin.Context) {
 		return
 	}
 
-	err := m.AddItem(newItem, userID)
+	addedItem, err := m.AddItem(newItem, userID)
 	if err != nil {
 		c.JSON(
 			http.StatusInternalServerError,
@@ -77,7 +77,7 @@ func AddItem(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, newItem)
+	c.JSON(http.StatusOK, addedItem)
 }
 
 func RemoveItem(c *gin.Context) {

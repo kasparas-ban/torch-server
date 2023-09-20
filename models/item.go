@@ -51,7 +51,7 @@ func GetAllItemsByUser(userID uint64) (items []Item, err error) {
 	return items, err
 }
 
-func AddItem(item AddItemReq, userID uint64) (err error) {
+func AddItem(item AddItemReq, userID uint64) (addedItem Item, err error) {
 	err = db.GetDB().Transaction(func(tx *gorm.DB) error {
 		// Add item into the items table
 		err = tx.Exec(`
@@ -71,10 +71,19 @@ func AddItem(item AddItemReq, userID uint64) (err error) {
 			}
 		}
 
+		// Select the newly added item
+		err = tx.Raw(`
+			SELECT item_id, title, type, target_date, priority, duration, rec_times, rec_period, rec_progress, parent_id, time_spent, created_at
+			FROM items WHERE item_id = LAST_INSERT_ID()
+		`).Scan(&addedItem).Error
+		if err != nil {
+			return err
+		}
+
 		return nil
 	})
 
-	return err
+	return addedItem, err
 }
 
 func RemoveItem(userID, itemID uint64) (err error) {
