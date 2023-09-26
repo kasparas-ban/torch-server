@@ -319,6 +319,19 @@ DEFAULT CHARACTER SET = utf8mb4
 COLLATE = utf8mb4_unicode_ci
 ;
 
+--  Timer History table
+CREATE TABLE IF NOT EXISTS `timer_history` (
+  `user_id` BIGINT UNSIGNED NOT NULL,
+  `start_time` TIMESTAMP,
+  `end_time` TIMESTAMP,
+  `item_id` BIGINT UNSIGNED,
+  PRIMARY KEY (`user_id`, `end_time`)
+)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_unicode_ci
+;
+
 
 -- ======= Sample data ==========
 

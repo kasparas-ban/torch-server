@@ -57,6 +57,9 @@ func main() {
 		api.DELETE("/remove-item", c.RemoveItem)
 		api.PUT("/update-item", c.UpdateItem)
 		api.PUT("/update-item-progress", c.UpdateItemProgress)
+
+		api.GET("/timer-history", c.GetTimerHistory)
+		api.PUT("/add-timer", c.UpsertTimerHistory)
 	}
 
 	port := os.Getenv("PORT")
