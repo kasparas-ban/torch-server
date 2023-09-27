@@ -8,14 +8,14 @@ import (
 
 type TimerHistory struct {
 	UserID    uint64 `json:"-"`
-	StartTime string `json:"startDate"`
-	EndTime   string `json:"endDate"`
+	StartTime string `json:"startTime"`
+	EndTime   string `json:"endTime"`
 	ItemID    uint64 `json:"itemID"`
 }
 
 type UpsertReq struct {
-	StartTime string `json:"startDate"`
-	EndTime   string `json:"endDate"`
+	StartTime string `json:"startTime"`
+	EndTime   string `json:"endTime"`
 	ItemID    uint64 `json:"itemID"`
 }
 

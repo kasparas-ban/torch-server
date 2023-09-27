@@ -59,7 +59,7 @@ func main() {
 		api.PUT("/update-item-progress", c.UpdateItemProgress)
 
 		api.GET("/timer-history", c.GetTimerHistory)
-		api.PUT("/add-timer", c.UpsertTimerHistory)
+		api.PUT("/add-timer-record", c.UpsertTimerHistory)
 	}
 
 	port := os.Getenv("PORT")
