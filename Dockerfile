@@ -6,5 +6,5 @@ RUN go build -o /torch-server
 FROM alpine
 COPY --from=build ./torch-server ./
 COPY --from=build ./server/.env ./
-EXPOSE 8080
-ENTRYPOINT ["/torch-server"]
+EXPOSE 3001
+ENTRYPOINT ["/torch-server", "-prod"]

@@ -1,0 +1,26 @@
+version: '3.9'
+services:
+  server:
+    build: ../
+    ports:
+      - '3001:3001'
+    depends_on:
+      - 'test_db'
+
+  test_db:
+    image: mysql
+    command: --default-authentication-plugin=caching_sha2_password
+    restart: always
+    ports:
+      - '3306:3306'
+    environment:
+      MYSQL_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - ../db/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  test_db_adminer:
+    image: adminer
+    restart: always
+    ports:
+      - '8080:8080'

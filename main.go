@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"os"
 
@@ -36,7 +37,10 @@ func main() {
 		log.Fatal("error: failed to load the env file")
 	}
 
-	if os.Getenv("ENV") == "PRODUCTION" {
+	prod := flag.Bool("prod", false, "Production environment")
+	flag.Parse()
+
+	if *prod {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
