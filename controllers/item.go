@@ -3,6 +3,7 @@ package controllers
 import (
 	"errors"
 	"net/http"
+	"strconv"
 	a "torch/torch-server/auth"
 	m "torch/torch-server/models"
 	o "torch/torch-server/optional"
@@ -83,8 +84,8 @@ func AddItem(c *gin.Context) {
 func RemoveItem(c *gin.Context) {
 	userID := a.GetUserID(c)
 
-	var reqBody RemoveItemReq
-	if err := c.BindJSON(&reqBody); err != nil {
+	itemID, err := strconv.ParseUint(c.Param("itemID"), 10, 64)
+	if err != nil {
 		c.JSON(
 			http.StatusBadRequest,
 			gin.H{"error": errors.New("Invalid item object")},
@@ -93,7 +94,7 @@ func RemoveItem(c *gin.Context) {
 		return
 	}
 
-	err := m.RemoveItem(userID, reqBody.itemID)
+	err = m.RemoveItem(userID, itemID)
 	if err != nil {
 		c.JSON(
 			http.StatusInternalServerError,

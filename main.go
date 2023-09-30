@@ -54,7 +54,7 @@ func main() {
 
 		api.GET("/items", c.GetAllItems)
 		api.POST("/add-item", c.AddItem)
-		api.DELETE("/remove-item", c.RemoveItem)
+		api.DELETE("/remove-item/:itemID", c.RemoveItem)
 		api.PUT("/update-item", c.UpdateItem)
 		api.PUT("/update-item-progress", c.UpdateItemProgress)
 
