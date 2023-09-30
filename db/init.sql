@@ -384,3 +384,5 @@ SET
   time_spent = time_spent + 1000
 WHERE
   user_id = 1 AND item_id = 1;
+
+INSERT INTO `timer_history` (`user_id`, `start_time`, `end_time`, `item_id`) VALUES (1, '2023-09-27 14:30:00', '2023-09-27 15:00:00', 15);

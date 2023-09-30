@@ -115,15 +115,15 @@ func UpdateItem(item UpdateItemReq, userID uint64) (err error) {
 		// Update item in the items table
 		err = tx.Exec(`
 			UPDATE items
+			SET
 				title = ?, 
 				target_date = ?,
 				priority = ?,
 				duration = ?,
-				parent_id = ?,
-				time_spent = ?
+				parent_id = ?
 			WHERE
 				user_id = ? AND item_id = ?
-		`, item.Title, item.TargetDate, item.Priority, item.Duration, item.ParentID, item.TimeSpent, userID, item.ItemID).Error
+		`, item.Title, item.TargetDate, item.Priority, item.Duration, item.ParentID, userID, item.ItemID).Error
 		if err != nil {
 			return err
 		}
