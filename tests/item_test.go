@@ -2,6 +2,7 @@ package tests
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -19,13 +20,23 @@ func TestMain(m *testing.M) {
 }
 
 func TestGetAllItems(t *testing.T) {
+	// MySQL database container setup
+	ctx := context.Background()
+	container, err := testutil.PrepareMySQLContainer(ctx)
+	if err != nil {
+		panic(err)
+	}
+	defer testutil.ContainerCleanUp(ctx, container)
+
+	// Router setup
 	w := httptest.NewRecorder()
-	ctx, router := gin.CreateTestContext(w)
+	c, router := gin.CreateTestContext(w)
 	testutil.MockAuthMiddleware(router)
 	r.RegisterRoutes(router, false)
 
-	ctx.Request = httptest.NewRequest(http.MethodGet, "/api/items", nil)
-	router.ServeHTTP(w, ctx.Request)
+	// Getting all items
+	c.Request = httptest.NewRequest(http.MethodGet, "/api/items", nil)
+	router.ServeHTTP(w, c.Request)
 
 	var items []models.Item
 	if err := json.Unmarshal(w.Body.Bytes(), &items); err != nil {
@@ -37,11 +48,21 @@ func TestGetAllItems(t *testing.T) {
 }
 
 func TestAddItem(t *testing.T) {
+	// MySQL database container setup
+	ctx := context.Background()
+	container, err := testutil.PrepareMySQLContainer(ctx)
+	if err != nil {
+		panic(err)
+	}
+	defer testutil.ContainerCleanUp(ctx, container)
+
+	// Router setup
 	w := httptest.NewRecorder()
-	ctx, router := gin.CreateTestContext(w)
+	c, router := gin.CreateTestContext(w)
 	testutil.MockAuthMiddleware(router)
 	r.RegisterRoutes(router, false)
 
+	// Request data setup
 	jsonData := []byte(`
 		{
 			"title": "Test item",
@@ -49,17 +70,18 @@ func TestAddItem(t *testing.T) {
 			"targetDate": "2024-01-01",
 			"priority": "HIGH",
 			"duration": 36000
-		}	
+		}
 	`)
 
 	var newItem models.Item
-	err := json.Unmarshal(jsonData, &newItem)
+	err = json.Unmarshal(jsonData, &newItem)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	ctx.Request = httptest.NewRequest(http.MethodPost, "/api/add-item", bytes.NewReader(jsonData))
-	router.ServeHTTP(w, ctx.Request)
+	// Adding a new item
+	c.Request = httptest.NewRequest(http.MethodPost, "/api/add-item", bytes.NewReader(jsonData))
+	router.ServeHTTP(w, c.Request)
 
 	var returnedItem models.Item
 	if err := json.Unmarshal(w.Body.Bytes(), &returnedItem); err != nil {

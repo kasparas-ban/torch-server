@@ -1,34 +1,44 @@
 package db
 
 import (
-	"database/sql"
+	"fmt"
 	"log"
+	"time"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
-type DB struct {
-	*sql.DB
-}
-
 var db *gorm.DB
 
 func Init(dsn string) {
 	var err error
-	db, err = ConnectDB(dsn)
+	db, err = ConnectDB(dsn, &gorm.Config{SkipDefaultTransaction: true})
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
-func ConnectDB(dataSourceName string) (*gorm.DB, error) {
-	db, err := gorm.Open(mysql.Open(dataSourceName), &gorm.Config{SkipDefaultTransaction: true})
-	if err != nil {
-		return nil, err
-	}
+func ConnectDB(connString string, options *gorm.Config) (db *gorm.DB, err error) {
+	numOfRetries := 6
+	timeoutSec := 10
 
-	return db, nil
+	for {
+		if numOfRetries <= 0 {
+			panic(fmt.Sprintf("Could not connect to the database after %ds", timeoutSec*numOfRetries))
+		}
+
+		db, err = gorm.Open(mysql.Open(connString), options)
+		fmt.Println("Trying to connect: ", connString)
+		if err != nil {
+			time.Sleep(time.Duration(timeoutSec) * time.Second)
+			numOfRetries--
+			continue
+		}
+
+		log.Println("Connected to the database")
+		return db, nil
+	}
 }
 
 func GetDB() *gorm.DB {
