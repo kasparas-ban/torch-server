@@ -8,6 +8,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 	"torch/torch-server/models"
 
 	"github.com/clerkinc/clerk-sdk-go/clerk"
@@ -24,6 +25,10 @@ const (
 func Init() {
 	var err error
 	client, err = clerk.NewClient(os.Getenv("CLERK_SECRET_KEY"))
+	clerk.WithSessionV2(
+		client,
+		clerk.WithLeeway(5*time.Second),
+	)
 	if err != nil {
 		log.Fatal(err)
 	}

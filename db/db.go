@@ -3,7 +3,6 @@ package db
 import (
 	"database/sql"
 	"log"
-	"os"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -15,9 +14,9 @@ type DB struct {
 
 var db *gorm.DB
 
-func Init() {
+func Init(dsn string) {
 	var err error
-	db, err = ConnectDB(os.Getenv("DSN"))
+	db, err = ConnectDB(dsn)
 	if err != nil {
 		log.Fatal(err)
 	}

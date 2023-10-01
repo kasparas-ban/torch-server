@@ -7,8 +7,8 @@ import (
 )
 
 type NullUint struct {
-	Val   uint
-	Valid bool
+	Val     uint
+	IsValid bool
 }
 
 func NewNullUint(val interface{}) NullUint {
@@ -26,24 +26,24 @@ func (ni *NullUint) Scan(value interface{}) error {
 	val, err := strconv.ParseUint(string(data), 10, 64)
 	if err == nil {
 		ni.Val = uint(val)
-		ni.Valid = true
+		ni.IsValid = true
 	}
 	return nil
 }
 
 func (ni NullUint) Value() (driver.Value, error) {
-	if !ni.Valid {
+	if !ni.IsValid {
 		return nil, nil
 	}
 	return int64(ni.Val), nil
 }
 
 func (ni *NullUint) Set(val interface{}) {
-	ni.Val, ni.Valid = val.(uint)
+	ni.Val, ni.IsValid = val.(uint)
 }
 
 func (ni NullUint) MarshalJSON() ([]byte, error) {
-	if !ni.Valid {
+	if !ni.IsValid {
 		return []byte(`null`), nil
 	}
 
@@ -52,24 +52,24 @@ func (ni NullUint) MarshalJSON() ([]byte, error) {
 
 func (ni *NullUint) UnmarshalJSON(data []byte) error {
 	if data == nil || string(data) == `null` {
-		ni.Valid = false
+		ni.IsValid = false
 		return nil
 	}
 
 	val, err := strconv.ParseUint(string(data), 10, 64)
 	if err != nil {
-		ni.Valid = false
+		ni.IsValid = false
 		return err
 	}
 
 	ni.Val = uint(val)
-	ni.Valid = true
+	ni.IsValid = true
 
 	return nil
 }
 
 func (ni NullUint) String() string {
-	if !ni.Valid {
+	if !ni.IsValid {
 		return `<nil>`
 	}
 
