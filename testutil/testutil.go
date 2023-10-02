@@ -22,11 +22,29 @@ var (
 )
 
 var MockUser uint64
+var Ctx context.Context
+var MysqlContainer *mysql.MySQLContainer
 
 func TestMain(m *testing.M) {
 	gin.SetMode(gin.TestMode)
 
+	local := flag.Bool("local", false, "Using locally running MySQL database")
 	flag.Parse()
+
+	if *local {
+		// Making a local database connection
+		dsn := fmt.Sprintf("%s:%s@tcp(localhost:3306)/%s", dbUsername, dbPassword, dbName)
+		db.Init(dsn)
+	} else {
+		// MySQL database container setup
+		Ctx = context.Background()
+		container, err := PrepareMySQLContainer(Ctx)
+		if err != nil {
+			panic(err)
+		}
+		defer ContainerCleanUp(Ctx, container)
+	}
+
 	exitCode := m.Run()
 	os.Exit(exitCode)
 }
@@ -60,7 +78,7 @@ func PrepareMySQLContainer(ctx context.Context) (*mysql.MySQLContainer, error) {
 		return nil, err
 	}
 
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", dbUsername, dbPassword, hostIP, mappedPort.Port(), dbName)
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", dbUsername, dbPassword, hostIP, mappedPort.Port(), dbName)
 	db.Init(dsn)
 
 	log.Printf("TestContainers: container %s is now running at %s\n", "mysql:latest", hostIP)

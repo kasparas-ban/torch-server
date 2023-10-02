@@ -2,7 +2,6 @@ package tests
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -20,14 +19,6 @@ func TestMain(m *testing.M) {
 }
 
 func TestGetAllItems(t *testing.T) {
-	// MySQL database container setup
-	ctx := context.Background()
-	container, err := testutil.PrepareMySQLContainer(ctx)
-	if err != nil {
-		panic(err)
-	}
-	defer testutil.ContainerCleanUp(ctx, container)
-
 	// Router setup
 	w := httptest.NewRecorder()
 	c, router := gin.CreateTestContext(w)
@@ -48,14 +39,6 @@ func TestGetAllItems(t *testing.T) {
 }
 
 func TestAddItem(t *testing.T) {
-	// MySQL database container setup
-	ctx := context.Background()
-	container, err := testutil.PrepareMySQLContainer(ctx)
-	if err != nil {
-		panic(err)
-	}
-	defer testutil.ContainerCleanUp(ctx, container)
-
 	// Router setup
 	w := httptest.NewRecorder()
 	c, router := gin.CreateTestContext(w)
@@ -74,7 +57,7 @@ func TestAddItem(t *testing.T) {
 	`)
 
 	var newItem models.Item
-	err = json.Unmarshal(jsonData, &newItem)
+	err := json.Unmarshal(jsonData, &newItem)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -91,9 +74,9 @@ func TestAddItem(t *testing.T) {
 	assert.Equal(t, 200, w.Code)
 	assert.Equal(t, newItem.Title, returnedItem.Title)
 	assert.Equal(t, newItem.Type, returnedItem.Type)
-	// assert.Equal(t, newItem.TargetDate.String(), returnedItem.TargetDate.String())
+	assert.Equal(t, newItem.TargetDate, returnedItem.TargetDate)
 	assert.Equal(t, newItem.Priority, returnedItem.Priority)
 	assert.Equal(t, newItem.Duration, returnedItem.Duration)
-	// assert.Equal(t, newItem.Recurring, item.Recurring)
-	assert.Equal(t, newItem.ParentID.String(), returnedItem.ParentID.String())
+	assert.Equal(t, newItem.Recurring, returnedItem.Recurring)
+	assert.Equal(t, newItem.ParentID, returnedItem.ParentID)
 }
