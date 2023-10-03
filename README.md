@@ -4,7 +4,13 @@ API server for the Torch frontend.
 
 ## Testing
 
-Testing basic CRUD operations on the server requires a test database. With the following comand Docker initializes this test database
+Testing basic CRUD operations on the server requires a test database. There are two ways to setup the database and run the tests.
+
+The default way requires no involvment from the user and works by automatically creating, launching, and removing a Docker container that contains the database. Run it with the usual command for go tests:
+
+`go test ./tests`
+
+Container setup, however, does take some time (>30s). To avoid waiting everytime a test is run, you can lauch a Docker container locally and reuse it across different test runs. To setup and lauch the container run the following command
 
 `cd tests/ && docker compose up -d`
 
@@ -12,4 +18,4 @@ To stop and remove Docker containers run
 
 `docker-compose down`
 
-You still need to remove server image by hand whenever you update your server code, otherwise the old version of your code will be used.
+Note that all images built this way will be cached and reused with each later launch.

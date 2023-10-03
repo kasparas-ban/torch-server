@@ -332,3 +332,56 @@ ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb4
 COLLATE = utf8mb4_unicode_ci
 ;
+
+
+-- ======= Sample data ==========
+
+-- Users table
+
+INSERT INTO `users` (`username`, `email`, `clerk_id`) VALUES ('kaspis245', 'kaspis245@gmail.com', 'user_2Ui3QUrAix2lslvsWBmvGeNBKtu');
+
+-- Items table
+
+INSERT INTO `items` (`user_id`, `title`, `type`, `priority`) VALUES (1, 'Learn Spanish', 'DREAM', 'HIGH');
+INSERT INTO `items` (`user_id`, `title`, `type`) VALUES (1, 'Get fit', 'DREAM');
+INSERT INTO `items` (`user_id`, `title`, `type`) VALUES (1, 'Get good at math', 'DREAM');
+
+INSERT INTO `items` (`user_id`, `title`, `type`, `target_date`, `priority`) VALUES (1, 'Make a todo/timer app', 'GOAL', '2023-12-01', 'HIGH');
+INSERT INTO `items` (`user_id`, `title`, `type`, `priority`) VALUES (1, 'Learn chess', 'GOAL', 'LOW');
+INSERT INTO `items` (`user_id`, `title`, `type`, `parent_id`) VALUES (1, 'Learn Spanish vocabulary', 'GOAL', 1);
+INSERT INTO `item_relations` (`user_id`, `parent_id`, `child_id`) VALUES (1, 1, 6);
+INSERT INTO `items` (`user_id`, `title`, `type`, `parent_id`) VALUES (1, 'Learn Spanish grammar', 'GOAL', 1);
+INSERT INTO `item_relations` (`user_id`, `parent_id`, `child_id`) VALUES (1, 1, 7);
+INSERT INTO `items` (`user_id`, `title`, `type`, `parent_id`) VALUES (1, 'Spanish language comprehension', 'GOAL', 1);
+INSERT INTO `item_relations` (`user_id`, `parent_id`, `child_id`) VALUES (1, 1, 8);
+INSERT INTO `items` (`user_id`, `title`, `type`, `parent_id`) VALUES (1, 'Spanish writing', 'GOAL', 1);
+INSERT INTO `item_relations` (`user_id`, `parent_id`, `child_id`) VALUES (1, 1, 9);
+INSERT INTO `items` (`user_id`, `title`, `type`, `parent_id`) VALUES (1, 'Build muscle', 'GOAL', 2);
+INSERT INTO `item_relations` (`user_id`, `parent_id`, `child_id`) VALUES (1, 2, 10);
+INSERT INTO `items` (`user_id`, `title`, `type`, `parent_id`, `target_date`) VALUES (1, 'Learn Linear Algebra', 'GOAL', 3, '2023-12-01');
+INSERT INTO `item_relations` (`user_id`, `parent_id`, `child_id`) VALUES (1, 3, 11);
+INSERT INTO `items` (`user_id`, `title`, `type`, `parent_id`) VALUES (1, 'Learn Calculus', 'GOAL', 3);
+INSERT INTO `item_relations` (`user_id`, `parent_id`, `child_id`) VALUES (1, 3, 12);
+INSERT INTO `items` (`user_id`, `title`, `type`) VALUES (1, 'Read "Demons" by Dostoevsky', 'GOAL');
+INSERT INTO `items` (`user_id`, `title`, `type`) VALUES (1, 'Read "The Shape of Space"', 'GOAL');
+
+INSERT INTO `items` (`user_id`, `title`, `type`, `duration`, `target_date`, `priority`, `parent_id`) VALUES (1, 'Make a Figma design sketch', 'TASK', 100800, '2023-10-30', 'MEDIUM', 4);
+INSERT INTO `item_relations` (`user_id`, `parent_id`, `child_id`) VALUES (1, 4, 15);
+INSERT INTO `items` (`user_id`, `title`, `type`, `duration`, `target_date`, `priority`, `parent_id`) VALUES (1, 'Code MVP frontend', 'TASK', 144000, '2023-10-30', 'HIGH', 4);
+INSERT INTO `item_relations` (`user_id`, `parent_id`, `child_id`) VALUES (1, 4, 16);
+INSERT INTO `items` (`user_id`, `title`, `type`, `duration`, `target_date`, `priority`, `parent_id`) VALUES (1, 'Make MVP backend', 'TASK', 108000, '2023-10-30', 'HIGH', 4);
+INSERT INTO `item_relations` (`user_id`, `parent_id`, `child_id`) VALUES (1, 4, 17);
+INSERT INTO `items` (`user_id`, `title`, `type`, `duration`, `parent_id`) VALUES (1, 'Learn common Spanish greeting phrases', 'TASK', 36000, 6);
+INSERT INTO `item_relations` (`user_id`, `parent_id`, `child_id`) VALUES (1, 6, 18);
+INSERT INTO `items` (`user_id`, `title`, `type`, `duration`, `parent_id`) VALUES (1, 'Memorize a list of essential words', 'TASK', 36000, 6);
+INSERT INTO `item_relations` (`user_id`, `parent_id`, `child_id`) VALUES (1, 6, 19);
+INSERT INTO `items` (`user_id`, `title`, `type`, `duration`, `parent_id`) VALUES (1, 'Learn Spanish pronunciation', 'TASK', 36000, 6);
+INSERT INTO `item_relations` (`user_id`, `parent_id`, `child_id`) VALUES (1, 6, 20);
+INSERT INTO `items` (`user_id`, `title`, `type`, `parent_id`, `rec_times`, `rec_period`, `rec_progress`) VALUES (1, 'Do weight lifting', 'TASK', 10, 3, 'WEEK', 2);
+INSERT INTO `item_relations` (`user_id`, `parent_id`, `child_id`) VALUES (1, 10, 21);
+
+UPDATE items
+SET
+  time_spent = time_spent + 1000
+WHERE
+  user_id = 1 AND item_id = 1;

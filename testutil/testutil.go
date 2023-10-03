@@ -33,7 +33,7 @@ func TestMain(m *testing.M) {
 
 	if *local {
 		// Making a local database connection
-		dsn := fmt.Sprintf("%s:%s@tcp(localhost:3306)/%s", dbUsername, dbPassword, dbName)
+		dsn := fmt.Sprintf("%s:%s@tcp(localhost:3306)/%s?multiStatements=true", dbUsername, dbPassword, dbName)
 		db.Init(dsn)
 	} else {
 		// MySQL database container setup
@@ -78,7 +78,7 @@ func PrepareMySQLContainer(ctx context.Context) (*mysql.MySQLContainer, error) {
 		return nil, err
 	}
 
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", dbUsername, dbPassword, hostIP, mappedPort.Port(), dbName)
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?multiStatements=true", dbUsername, dbPassword, hostIP, mappedPort.Port(), dbName)
 	db.Init(dsn)
 
 	log.Printf("TestContainers: container %s is now running at %s\n", "mysql:latest", hostIP)
@@ -88,5 +88,55 @@ func PrepareMySQLContainer(ctx context.Context) (*mysql.MySQLContainer, error) {
 func ContainerCleanUp(ctx context.Context, container *mysql.MySQLContainer) {
 	if err := container.Terminate(ctx); err != nil {
 		panic(err)
+	}
+}
+
+func getSQL(filename string) (string, error) {
+	// This will run from /tests directory
+	filePath := fmt.Sprintf("../testutil/sqlScripts/%s.sql", filename)
+	sqlContents, err := os.ReadFile(filePath)
+	if err != nil {
+		return "", err
+	}
+
+	return string(sqlContents), nil
+}
+
+func SeedDB() {
+	// Users data
+	filename := "insertUsers"
+	cmd, err := getSQL(filename)
+	if err != nil {
+		panic("Failed to load SQL command")
+	}
+
+	err = db.GetDB().Exec(cmd).Error
+	if err != nil {
+		panic("Failed to seed the DB")
+	}
+
+	// Items data
+	filename = "insertItems"
+	cmd, err = getSQL(filename)
+	if err != nil {
+		panic("Failed to load SQL command")
+	}
+
+	err = db.GetDB().Exec(cmd).Error
+	if err != nil {
+		panic("Failed to seed the DB")
+	}
+}
+
+func CleanAllTables() {
+	filename := "cleanAllTables"
+	cmd, err := getSQL(filename)
+	if err != nil {
+		panic("Failed to load SQL command")
+	}
+
+	err = db.GetDB().Exec(cmd).Error
+	if err != nil {
+		panic("Failed to clean all tables")
 	}
 }

@@ -19,6 +19,8 @@ func TestMain(m *testing.M) {
 }
 
 func TestGetAllItems(t *testing.T) {
+	testutil.SeedDB()
+
 	// Router setup
 	w := httptest.NewRecorder()
 	c, router := gin.CreateTestContext(w)
@@ -34,11 +36,15 @@ func TestGetAllItems(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	assert.Equal(t, 200, w.Code)
-	assert.Equal(t, len(items), 21)
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, 21, len(items))
+
+	testutil.CleanAllTables()
 }
 
 func TestAddItem(t *testing.T) {
+	testutil.SeedDB()
+
 	// Router setup
 	w := httptest.NewRecorder()
 	c, router := gin.CreateTestContext(w)
@@ -71,7 +77,7 @@ func TestAddItem(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	assert.Equal(t, 200, w.Code)
+	assert.Equal(t, http.StatusOK, w.Code)
 	assert.Equal(t, newItem.Title, returnedItem.Title)
 	assert.Equal(t, newItem.Type, returnedItem.Type)
 	assert.Equal(t, newItem.TargetDate, returnedItem.TargetDate)
@@ -79,4 +85,6 @@ func TestAddItem(t *testing.T) {
 	assert.Equal(t, newItem.Duration, returnedItem.Duration)
 	assert.Equal(t, newItem.Recurring, returnedItem.Recurring)
 	assert.Equal(t, newItem.ParentID, returnedItem.ParentID)
+
+	testutil.CleanAllTables()
 }
