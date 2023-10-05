@@ -1,7 +1,9 @@
 package controllers
 
 import (
+	"os"
 	"torch/torch-server/auth"
+	"torch/torch-server/controllers/history"
 	"torch/torch-server/controllers/items"
 	"torch/torch-server/controllers/users"
 
@@ -39,16 +41,17 @@ func RegisterRoutes(r *gin.Engine, useAuth bool) *gin.Engine {
 		api.PUT("/update-item", items.UpdateItem)
 		api.PUT("/update-item-progress", items.UpdateItemProgress)
 
-		api.GET("/timer-history", GetTimerHistory)
-		api.PUT("/add-timer-record", UpsertTimerHistory)
+		api.GET("/timer-history", history.GetTimerHistory)
+		api.PUT("/add-timer-record", history.UpsertTimerHistory)
 	}
 
 	return r
 }
 
 func CORSMiddleware() gin.HandlerFunc {
+	domain := os.Getenv("FE_DOMAIN")
 	return func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173")
+		c.Writer.Header().Set("Access-Control-Allow-Origin", domain)
 		c.Writer.Header().Set("Access-Control-Max-Age", "86400")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, UPDATE")
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "X-Requested-With, Content-Type, Origin, Authorization, Accept, Client-Security-Token, Accept-Encoding, x-access-token")
