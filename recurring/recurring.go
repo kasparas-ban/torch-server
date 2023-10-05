@@ -8,9 +8,10 @@ import (
 )
 
 type Recurring struct {
-	Times    optional.NullUint   `gorm:"column:rec_times" json:"times"`
-	Period   optional.NullString `gorm:"column:rec_period" json:"period"`
-	Progress optional.NullUint   `gorm:"column:rec_progress" json:"progress"`
+	Times     optional.NullUint   `gorm:"column:rec_times" json:"times"`
+	Period    optional.NullString `gorm:"column:rec_period" json:"period"`
+	Progress  optional.NullUint   `gorm:"column:rec_progress" json:"progress"`
+	UpdatedAt optional.NullString `gorm:"column:rec_updated_at" json:"updatedAt"`
 }
 
 type NullRecurring struct {
@@ -81,3 +82,11 @@ func (ni NullRecurring) String() string {
 
 	return fmt.Sprintf("Times: %v, Period: %v, Progress: %v", ni.Val.Times, ni.Val.Period, ni.Val.Progress)
 }
+
+// func (ni Recurring) MarshalJSON() ([]byte, error) {
+// 	if ni.Times.Val == 0 {
+// 		return []byte(`null`), nil
+// 	}
+
+// 	return json.Marshal(ni)
+// }

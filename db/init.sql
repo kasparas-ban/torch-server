@@ -299,6 +299,7 @@ CREATE TABLE IF NOT EXISTS `items` (
   `rec_times` INT UNSIGNED,
   `rec_period` ENUM('WEEK', 'DAY', 'MONTH'),
   `rec_progress` INT UNSIGNED,
+  `rec_updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `parent_id` BIGINT UNSIGNED,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   INDEX `idx_user_id` (`user_id`)

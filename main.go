@@ -6,8 +6,8 @@ import (
 	"os"
 
 	"torch/torch-server/auth"
+	"torch/torch-server/controllers"
 	"torch/torch-server/db"
-	"torch/torch-server/router"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -31,7 +31,7 @@ func main() {
 	db.Init(os.Getenv("DSN"))
 	auth.Init()
 
-	r := router.SetupRouter(true, true)
+	r := controllers.SetupRouter(true, true)
 
 	log.Printf("\n\n PORT: %s \n ENV: %s \n SSL: %s \n Version: %s \n\n", port, os.Getenv("ENV"), os.Getenv("SSL"), os.Getenv("API_VERSION"))
 

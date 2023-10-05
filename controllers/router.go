@@ -1,8 +1,9 @@
-package router
+package controllers
 
 import (
 	"torch/torch-server/auth"
-	"torch/torch-server/controllers"
+	"torch/torch-server/controllers/items"
+	"torch/torch-server/controllers/users"
 
 	"github.com/gin-gonic/gin"
 )
@@ -29,16 +30,17 @@ func RegisterRoutes(r *gin.Engine, useAuth bool) *gin.Engine {
 
 	api := r.Group("/api")
 	{
-		api.GET("/user-info", controllers.GetUserInfo)
+		api.GET("/user-info", users.GetUserInfo)
 
-		api.GET("/items", controllers.GetAllItems)
-		api.POST("/add-item", controllers.AddItem)
-		api.DELETE("/remove-item/:itemID", controllers.RemoveItem)
-		api.PUT("/update-item", controllers.UpdateItem)
-		api.PUT("/update-item-progress", controllers.UpdateItemProgress)
+		api.GET("/items", items.GetAllItems)
+		api.POST("/add-item/:type", items.AddItem)
 
-		api.GET("/timer-history", controllers.GetTimerHistory)
-		api.PUT("/add-timer-record", controllers.UpsertTimerHistory)
+		api.DELETE("/remove-item/:itemID", items.RemoveItem)
+		api.PUT("/update-item", items.UpdateItem)
+		api.PUT("/update-item-progress", items.UpdateItemProgress)
+
+		api.GET("/timer-history", GetTimerHistory)
+		api.PUT("/add-timer-record", UpsertTimerHistory)
 	}
 
 	return r

@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"torch/torch-server/models"
+	"torch/torch-server/controllers/users"
 
 	"github.com/clerkinc/clerk-sdk-go/clerk"
 	"github.com/gin-gonic/gin"
@@ -109,7 +109,7 @@ func GetUserID(c *gin.Context) uint64 {
 }
 
 func addUserID(c *gin.Context, user *clerk.User) error {
-	userInfo, err := models.GetUserInfoByClerkID(user.ID)
+	userInfo, err := users.GetUserByClerkID(user.ID)
 	if err != nil {
 		return err
 	}
