@@ -23,19 +23,19 @@ type CommonItem struct {
 	Priority   o.NullString `json:"priority"`
 }
 
-type NewTask struct {
+type Task struct {
 	CommonItem
 	Duration  o.NullUint   `json:"duration"`
 	Recurring r.Recurring  `gorm:"embedded" json:"recurring,omitempty"`
 	ParentID  o.NullUint64 `json:"parentID"`
 }
 
-type NewGoal struct {
+type Goal struct {
 	CommonItem
 	ParentID o.NullUint64 `json:"parentID"`
 }
 
-type NewDream struct {
+type Dream struct {
 	CommonItem
 }
 
@@ -45,11 +45,11 @@ func AddItem(c *gin.Context) {
 
 	switch itemType {
 	case "task":
-		SaveItem[NewTask](c, userID)
+		SaveItem[Task](c, userID)
 	case "goal":
-		SaveItem[NewGoal](c, userID)
+		SaveItem[Goal](c, userID)
 	case "dream":
-		SaveItem[NewDream](c, userID)
+		SaveItem[Dream](c, userID)
 	default:
 		c.JSON(
 			http.StatusBadRequest,
@@ -83,7 +83,7 @@ func SaveItem[T GeneralItem](c *gin.Context, userID uint64) {
 	c.JSON(http.StatusOK, item)
 }
 
-func (item NewTask) Save(userID uint64) (addedItem Item, err error) {
+func (item Task) Save(userID uint64) (addedItem Item, err error) {
 	err = db.GetDB().Transaction(func(tx *gorm.DB) error {
 		// Add item into the items table
 		err = tx.Exec(`
@@ -118,7 +118,7 @@ func (item NewTask) Save(userID uint64) (addedItem Item, err error) {
 	return addedItem, err
 }
 
-func (item NewGoal) Save(userID uint64) (addedItem Item, err error) {
+func (item Goal) Save(userID uint64) (addedItem Item, err error) {
 	err = db.GetDB().Transaction(func(tx *gorm.DB) error {
 		// Add item into the items table
 		err = tx.Exec(`
@@ -153,7 +153,7 @@ func (item NewGoal) Save(userID uint64) (addedItem Item, err error) {
 	return addedItem, err
 }
 
-func (item NewDream) Save(userID uint64) (addedItem Item, err error) {
+func (item Dream) Save(userID uint64) (addedItem Item, err error) {
 	err = db.GetDB().Transaction(func(tx *gorm.DB) error {
 		// Add item into the items table
 		err = tx.Exec(`

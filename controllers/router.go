@@ -35,10 +35,11 @@ func RegisterRoutes(r *gin.Engine, useAuth bool) *gin.Engine {
 		api.GET("/user-info", users.GetUserInfo)
 
 		api.GET("/items", items.GetAllItems)
+		api.GET("/item/:itemID", items.GetItem)
 		api.POST("/add-item/:type", items.AddItem)
 
 		api.DELETE("/remove-item/:itemID", items.RemoveItem)
-		api.PUT("/update-item", items.UpdateItem)
+		api.PUT("/update-item/:type", items.UpdateItem)
 		api.PUT("/update-item-progress", items.UpdateItemProgress)
 
 		api.GET("/timer-history", history.GetTimerHistory)
