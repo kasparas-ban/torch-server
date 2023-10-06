@@ -8,7 +8,6 @@ import (
 	"torch/torch-server/db"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 func RemoveItem(c *gin.Context) {
@@ -38,25 +37,9 @@ func RemoveItem(c *gin.Context) {
 }
 
 func remove(userID, itemID uint64) error {
-	err := db.GetDB().Transaction(func(tx *gorm.DB) error {
-		// Remove item from the items table
-		err := tx.Exec(`
-			DELETE FROM items WHERE user_id = ? AND item_id = ?
-		`, userID, itemID).Error
-		if err != nil {
-			return err
-		}
-
-		// Remove all relationships with the item
-		err = tx.Exec(`
-			DELETE FROM item_relations WHERE user_id = ? AND (parent_id = ? OR child_id = ?)
-		`, userID, itemID, itemID).Error
-		if err != nil {
-			return err
-		}
-
-		return nil
-	})
+	err := db.GetDB().Exec(`
+		CALL DeleteItem(?, ?)
+	`, userID, itemID).Error
 
 	return err
 }

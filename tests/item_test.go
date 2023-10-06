@@ -274,7 +274,7 @@ func TestRemoveItem(t *testing.T) {
 
 	beforeChildrenNum := 0
 	for _, item := range readItems {
-		if item.ParentID.Val == itemID {
+		if item.ParentID.Valid && item.ParentID.Val == itemID {
 			beforeChildrenNum += 1
 		}
 	}
@@ -319,7 +319,7 @@ func TestRemoveItem(t *testing.T) {
 
 	afterChildrenNum := 0
 	for _, item := range readItems {
-		if item.ParentID.Val == itemID {
+		if item.ParentID.Valid && item.ParentID.Val == itemID {
 			afterChildrenNum += 1
 		}
 	}

@@ -333,3 +333,21 @@ ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb4
 COLLATE = utf8mb4_unicode_ci
 ;
+
+-- Procedures
+
+DELIMITER //
+CREATE PROCEDURE DeleteItem(IN userID BIGINT UNSIGNED, IN itemID BIGINT UNSIGNED)
+BEGIN
+    START TRANSACTION;
+    
+    DELETE FROM items WHERE user_id = userID AND item_id = itemID;
+
+    DELETE FROM item_relations WHERE user_id = userID AND (parent_id = itemID OR child_id = itemID);
+
+    UPDATE items SET parent_id = NULL WHERE user_id = userID AND parent_id = itemID;
+
+    COMMIT;
+END;
+//
+DELIMITER ;
