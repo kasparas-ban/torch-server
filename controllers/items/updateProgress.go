@@ -10,8 +10,8 @@ import (
 )
 
 type UpdateItemProgressReq struct {
-	itemID    uint64
-	timeSpent int
+	ItemID    uint64 `json:"itemID"`
+	TimeSpent uint   `json:"timeSpent"`
 }
 
 func UpdateItemProgress(c *gin.Context) {
@@ -27,7 +27,7 @@ func UpdateItemProgress(c *gin.Context) {
 		return
 	}
 
-	err := updateProgress(userID, reqBody.itemID, reqBody.timeSpent)
+	err := updateProgress(userID, reqBody.ItemID, reqBody.TimeSpent)
 	if err != nil {
 		c.JSON(
 			http.StatusInternalServerError,
@@ -40,13 +40,11 @@ func UpdateItemProgress(c *gin.Context) {
 	c.JSON(http.StatusOK, nil)
 }
 
-func updateProgress(userID, itemID uint64, timeSpent int) error {
-	err := db.GetDB().Raw(`
+func updateProgress(userID, itemID uint64, timeSpent uint) error {
+	err := db.GetDB().Exec(`
 		UPDATE items
-		SET
-			time_spent = time_spent + ?
-		WHERE
-			user_id = ? AND item_id = ?
-	`, timeSpent, timeSpent, userID, itemID).Error
+		SET time_spent = time_spent + ?
+		WHERE user_id = ? AND item_id = ?
+	`, timeSpent, userID, itemID).Error
 	return err
 }

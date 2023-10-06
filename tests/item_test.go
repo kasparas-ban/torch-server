@@ -330,3 +330,62 @@ func TestRemoveItem(t *testing.T) {
 
 	testutil.CleanAllTables()
 }
+
+func TestUpdateItemProgress(t *testing.T) {
+	testutil.CleanAllTables()
+	testutil.SeedDB()
+
+	// Router setup
+	w, c, router := RouterSetup()
+
+	// Reading an item
+	var itemID uint64 = 1
+	c.Request = httptest.NewRequest(http.MethodGet, fmt.Sprintf("/api/item/%d", itemID), nil)
+	router.ServeHTTP(w, c.Request)
+
+	var item items.Item
+	if err := json.Unmarshal(w.Body.Bytes(), &item); err != nil {
+		t.Fatal(err)
+	}
+
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	// Router setup
+	w, c, router = RouterSetup()
+
+	// Updating item progress
+	requestJson := []byte(`
+		{
+			"itemID": 1,
+			"timeSpent": 1000
+		}
+	`)
+
+	var requestBody items.UpdateItemProgressReq
+	err := json.Unmarshal(requestJson, &requestBody)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	c.Request = httptest.NewRequest(http.MethodPut, "/api/update-item-progress", bytes.NewReader(requestJson))
+	router.ServeHTTP(w, c.Request)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	// Router setup
+	w, c, router = RouterSetup()
+
+	// Reading an item
+	c.Request = httptest.NewRequest(http.MethodGet, fmt.Sprintf("/api/item/%d", itemID), nil)
+	router.ServeHTTP(w, c.Request)
+
+	var updatedItem items.Item
+	if err := json.Unmarshal(w.Body.Bytes(), &updatedItem); err != nil {
+		t.Fatal(err)
+	}
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, item.TimeSpent+requestBody.TimeSpent, updatedItem.TimeSpent)
+
+	testutil.CleanAllTables()
+}
