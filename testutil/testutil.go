@@ -16,9 +16,9 @@ import (
 )
 
 var (
-	dbUsername = "root"
-	dbPassword = "root"
-	dbName     = "torch-database"
+	DBUsername = "root"
+	DBPassword = "root"
+	DBName     = "torch-database"
 )
 
 var MockUser uint64
@@ -33,7 +33,7 @@ func TestMain(m *testing.M) {
 
 	if *local {
 		// Making a local database connection
-		dsn := fmt.Sprintf("%s:%s@tcp(localhost:3306)/%s?multiStatements=true", dbUsername, dbPassword, dbName)
+		dsn := fmt.Sprintf("%s:%s@tcp(localhost:3306)/%s?multiStatements=true", DBUsername, DBPassword, DBName)
 		db.Init(dsn)
 	} else {
 		// MySQL database container setup
@@ -59,9 +59,9 @@ func MockAuthMiddleware(r *gin.Engine) {
 func PrepareMySQLContainer(ctx context.Context) (*mysql.MySQLContainer, error) {
 	container, err := mysql.RunContainer(ctx,
 		testcontainers.WithImage("mysql:latest"),
-		mysql.WithDatabase(dbName),
-		mysql.WithUsername(dbUsername),
-		mysql.WithPassword(dbPassword),
+		mysql.WithDatabase(DBName),
+		mysql.WithUsername(DBUsername),
+		mysql.WithPassword(DBPassword),
 		mysql.WithScripts("../db/init.sql"),
 	)
 	if err != nil {
@@ -78,7 +78,7 @@ func PrepareMySQLContainer(ctx context.Context) (*mysql.MySQLContainer, error) {
 		return nil, err
 	}
 
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?multiStatements=true", dbUsername, dbPassword, hostIP, mappedPort.Port(), dbName)
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?multiStatements=true", DBUsername, DBPassword, hostIP, mappedPort.Port(), DBName)
 	db.Init(dsn)
 
 	log.Printf("TestContainers: container %s is now running at %s\n", "mysql:latest", hostIP)

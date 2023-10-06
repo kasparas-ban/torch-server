@@ -93,8 +93,9 @@ func GetItem(c *gin.Context) {
 	c.JSON(http.StatusOK, item)
 }
 
-func getAllItemsByUser(userID uint64) (items []Item, err error) {
-	err = db.GetDB().Raw(`
+func getAllItemsByUser(userID uint64) ([]Item, error) {
+	items := []Item{}
+	err := db.GetDB().Raw(`
 		SELECT item_id, title, type, target_date, priority, duration, rec_times, rec_period, rec_progress, rec_updated_at, parent_id, time_spent, created_at
 		FROM items WHERE user_id = ?
 	`, userID).Scan(&items).Error

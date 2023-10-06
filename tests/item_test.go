@@ -28,6 +28,27 @@ func RouterSetup() (*httptest.ResponseRecorder, *gin.Context, *gin.Engine) {
 	return w, c, router
 }
 
+func TestGetEmptyList(t *testing.T) {
+	testutil.CleanAllTables()
+
+	// Router setup
+	w, c, router := RouterSetup()
+
+	// Getting all items
+	c.Request = httptest.NewRequest(http.MethodGet, "/api/items", nil)
+	router.ServeHTTP(w, c.Request)
+
+	var items []items.Item
+	if err := json.Unmarshal(w.Body.Bytes(), &items); err != nil {
+		t.Fatal(err)
+	}
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, 0, len(items))
+
+	testutil.CleanAllTables()
+}
+
 func TestGetAllItems(t *testing.T) {
 	testutil.CleanAllTables()
 	testutil.SeedDB()
@@ -129,11 +150,11 @@ func TestAddItem(t *testing.T) {
 	}
 
 	assert.Equal(t, http.StatusOK, w.Code)
-	assert.Equal(t, returnedGoal.Title, returnedGoal.Title)
-	assert.Equal(t, returnedGoal.Type, returnedGoal.Type)
-	assert.Equal(t, returnedGoal.TargetDate, returnedGoal.TargetDate)
-	assert.Equal(t, returnedGoal.Priority, returnedGoal.Priority)
-	assert.Equal(t, returnedGoal.ParentID, returnedGoal.ParentID)
+	assert.Equal(t, newGoal.Title, returnedGoal.Title)
+	assert.Equal(t, newGoal.Type, returnedGoal.Type)
+	assert.Equal(t, newGoal.TargetDate, returnedGoal.TargetDate)
+	assert.Equal(t, newGoal.Priority, returnedGoal.Priority)
+	assert.Equal(t, newGoal.ParentID, returnedGoal.ParentID)
 
 	// Router setup
 	w, c, router = RouterSetup()
@@ -229,7 +250,20 @@ func TestRemoveItem(t *testing.T) {
 	// Router setup
 	w, c, router := RouterSetup()
 
-	// Getting all items
+	// Reading an item
+	var itemID uint64 = 1
+	c.Request = httptest.NewRequest(http.MethodGet, fmt.Sprintf("/api/item/%d", itemID), nil)
+	router.ServeHTTP(w, c.Request)
+
+	var item items.Item
+	if err := json.Unmarshal(w.Body.Bytes(), &item); err != nil {
+		t.Fatal(err)
+	}
+
+	// Router setup
+	w, c, router = RouterSetup()
+
+	// Counting the children of the item
 	c.Request = httptest.NewRequest(http.MethodGet, "/api/items", nil)
 	router.ServeHTTP(w, c.Request)
 
@@ -238,21 +272,16 @@ func TestRemoveItem(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	beforeChildrenNum := 0
+	for _, item := range readItems {
+		if item.ParentID.Val == itemID {
+			beforeChildrenNum += 1
+		}
+	}
+
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.Equal(t, 21, len(readItems))
-
-	// Router setup
-	w, c, router = RouterSetup()
-
-	// Reading an item
-	itemID := 1
-	c.Request = httptest.NewRequest(http.MethodGet, fmt.Sprintf("/api/item/%d", itemID), nil)
-	router.ServeHTTP(w, c.Request)
-
-	var item items.Item
-	if err := json.Unmarshal(w.Body.Bytes(), &item); err != nil {
-		t.Fatal(err)
-	}
+	assert.NotEqual(t, 0, beforeChildrenNum)
 
 	// Router setup
 	w, c, router = RouterSetup()
@@ -276,6 +305,28 @@ func TestRemoveItem(t *testing.T) {
 	}
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
+
+	// Router setup
+	w, c, router = RouterSetup()
+
+	// Counting the children of the item
+	c.Request = httptest.NewRequest(http.MethodGet, "/api/items", nil)
+	router.ServeHTTP(w, c.Request)
+
+	if err := json.Unmarshal(w.Body.Bytes(), &readItems); err != nil {
+		t.Fatal(err)
+	}
+
+	afterChildrenNum := 0
+	for _, item := range readItems {
+		if item.ParentID.Val == itemID {
+			afterChildrenNum += 1
+		}
+	}
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, 20, len(readItems))
+	assert.Equal(t, 0, afterChildrenNum)
 
 	testutil.CleanAllTables()
 }

@@ -18,16 +18,22 @@ func NewNullUint(val interface{}) NullUint {
 }
 
 func (ni *NullUint) Scan(value interface{}) error {
-	data, ok := value.([]uint8)
+	data, ok := value.(int64)
+	if ok {
+		ni.Val = uint(data)
+		ni.IsValid = true
+	}
+
+	strData, ok := value.([]uint8)
 	if !ok {
 		return nil
 	}
-
-	val, err := strconv.ParseUint(string(data), 10, 64)
+	val, err := strconv.ParseUint(string(strData), 10, 64)
 	if err == nil {
 		ni.Val = uint(val)
 		ni.IsValid = true
 	}
+
 	return nil
 }
 

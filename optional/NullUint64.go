@@ -18,16 +18,23 @@ func NewNullUint64(val interface{}) NullUint64 {
 }
 
 func (ni *NullUint64) Scan(value interface{}) error {
-	data, ok := value.([]uint8)
-	if !ok {
+	data, ok := value.(int64)
+	if ok {
+		ni.Val = uint64(data)
+		ni.Valid = true
 		return nil
 	}
 
-	val, err := strconv.ParseUint(string(data), 10, 64)
+	strData, ok := value.([]uint8)
+	if !ok {
+		return nil
+	}
+	val, err := strconv.ParseUint(string(strData), 10, 64)
 	if err == nil {
 		ni.Val = val
 		ni.Valid = true
 	}
+
 	return nil
 }
 

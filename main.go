@@ -2,12 +2,14 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"os"
 
 	"torch/torch-server/auth"
 	"torch/torch-server/controllers"
 	"torch/torch-server/db"
+	"torch/torch-server/testutil"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -26,9 +28,12 @@ func main() {
 
 	if *prod {
 		gin.SetMode(gin.ReleaseMode)
+		db.Init(os.Getenv("DSN"))
+	} else {
+		dsn := fmt.Sprintf("%s:%s@tcp(localhost:3306)/%s?multiStatements=true", testutil.DBUsername, testutil.DBPassword, testutil.DBName)
+		db.Init(dsn)
 	}
 
-	db.Init(os.Getenv("DSN"))
 	auth.Init()
 
 	r := controllers.SetupRouter(true, true)
