@@ -374,8 +374,6 @@ CREATE PROCEDURE DeleteUser(IN userID BIGINT UNSIGNED)
 BEGIN
     START TRANSACTION;
 
-    SELECT user_id FROM users WHERE clerk_id = clerkID;
-
     DELETE FROM users WHERE user_id = userID;
     DELETE FROM items WHERE user_id = userID;
     DELETE FROM item_relations WHERE user_id = userID;

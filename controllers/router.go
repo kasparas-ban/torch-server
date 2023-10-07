@@ -34,7 +34,7 @@ func RegisterRoutes(r *gin.Engine, useAuth bool) *gin.Engine {
 	{
 		api.GET("/user-info", users.HandleGetUserInfo)
 		api.POST("/add-user", users.HandleAddNewUser)
-		api.DELETE("/add-user", users.HandleDeleteUser)
+		api.DELETE("/delete-user", users.HandleDeleteUser)
 
 		api.GET("/items", items.GetAllItems)
 		api.GET("/item/:itemID", items.GetItem)

@@ -57,10 +57,10 @@ func AddUser(clerkID string, u NewUser) (ExistingUser, error) {
 	return newUser, err
 }
 
-func DeleteUser(userID, itemID uint64) error {
+func DeleteUser(userID uint64) error {
 	err := db.GetDB().Exec(`
-		CALL DeleteItem(?, ?)
-	`, userID, itemID).Error
+		CALL DeleteUser(?)
+	`, userID).Error
 
 	return err
 }

@@ -1,9 +1,7 @@
 package users
 
 import (
-	"errors"
 	"net/http"
-	"strconv"
 	a "torch/torch-server/auth"
 	m "torch/torch-server/models"
 
@@ -13,17 +11,7 @@ import (
 func HandleDeleteUser(c *gin.Context) {
 	userID := a.GetUserID(c)
 
-	itemID, err := strconv.ParseUint(c.Param("itemID"), 10, 64)
-	if err != nil {
-		c.JSON(
-			http.StatusBadRequest,
-			gin.H{"error": errors.New("Invalid item ID")},
-		)
-		c.Abort()
-		return
-	}
-
-	err = m.DeleteUser(userID, itemID)
+	err := m.DeleteUser(userID)
 	if err != nil {
 		c.JSON(
 			http.StatusInternalServerError,

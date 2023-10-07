@@ -27,6 +27,14 @@ func HandleGetUserInfo(c *gin.Context) {
 		c.Abort()
 		return
 	}
+	if user.UserID == 0 {
+		c.JSON(
+			http.StatusNotFound,
+			gin.H{"error": errors.New("User not found")},
+		)
+		c.Abort()
+		return
+	}
 
 	c.JSON(http.StatusOK, user)
 }
@@ -46,6 +54,14 @@ func GetUserInfoByClerkID(c *gin.Context) {
 		c.JSON(
 			http.StatusInternalServerError,
 			gin.H{"error": err.Error()},
+		)
+		c.Abort()
+		return
+	}
+	if user.UserID == 0 {
+		c.JSON(
+			http.StatusNotFound,
+			gin.H{"error": errors.New("User not found")},
 		)
 		c.Abort()
 		return
