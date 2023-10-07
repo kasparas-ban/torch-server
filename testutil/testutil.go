@@ -49,8 +49,8 @@ func TestMain(m *testing.M) {
 	os.Exit(exitCode)
 }
 
-func MockAuthMiddleware(r *gin.Engine) {
-	MockUser = 1
+func MockAuthMiddleware(r *gin.Engine, mockUserID uint64) {
+	MockUser = mockUserID
 	r.Use(func(c *gin.Context) {
 		c.Set("userID", MockUser)
 	})

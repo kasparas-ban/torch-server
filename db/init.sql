@@ -351,3 +351,20 @@ BEGIN
 END;
 //
 DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE AddUser(IN newClerkID VARCHAR(50), newUsername VARCHAR(30), newEmail VARCHAR(255), newBirthday DATE, newGender ENUM('MALE', 'FEMALE', 'OTHER'), newCountryID TINYINT UNSIGNED, newCity VARCHAR(255), newDescription VARCHAR(300))
+BEGIN
+    START TRANSACTION;
+    
+    INSERT INTO users (clerk_id, username, email, birthday, gender, country_id, city, `description`) VALUES (newClerkID, newUsername, newEmail, newBirthday, newGender, newCountryID, newCity, newDescription);
+
+    SELECT u.user_id, u.clerk_id, u.username, u.email, u.birthday, u.gender, c.country, u.city, u.description, u.created_at 
+		FROM users u
+		LEFT JOIN countries c ON u.country_id = c.country_id
+		WHERE u.user_id = LAST_INSERT_ID() LIMIT 1;
+
+    COMMIT;
+END;
+//
+DELIMITER ;

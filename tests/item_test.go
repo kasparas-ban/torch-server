@@ -7,32 +7,17 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"torch/torch-server/controllers"
 	"torch/torch-server/controllers/items"
 	"torch/torch-server/testutil"
 
-	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
-
-func TestMain(m *testing.M) {
-	testutil.TestMain(m)
-}
-
-func RouterSetup() (*httptest.ResponseRecorder, *gin.Context, *gin.Engine) {
-	w := httptest.NewRecorder()
-	c, router := gin.CreateTestContext(w)
-	testutil.MockAuthMiddleware(router)
-	controllers.RegisterRoutes(router, false)
-
-	return w, c, router
-}
 
 func TestGetEmptyList(t *testing.T) {
 	testutil.CleanAllTables()
 
 	// Router setup
-	w, c, router := RouterSetup()
+	w, c, router := RouterSetup(userID)
 
 	// Getting all items
 	c.Request = httptest.NewRequest(http.MethodGet, "/api/items", nil)
@@ -54,7 +39,7 @@ func TestGetAllItems(t *testing.T) {
 	testutil.SeedDB()
 
 	// Router setup
-	w, c, router := RouterSetup()
+	w, c, router := RouterSetup(userID)
 
 	// Getting all items
 	c.Request = httptest.NewRequest(http.MethodGet, "/api/items", nil)
@@ -73,7 +58,7 @@ func TestGetAllItems(t *testing.T) {
 
 func TestAddItem(t *testing.T) {
 	// Router setup
-	w, c, router := RouterSetup()
+	w, c, router := RouterSetup(userID)
 
 	// Request data setup
 	newDreamJson := []byte(`
@@ -138,7 +123,7 @@ func TestAddItem(t *testing.T) {
 	assert.Equal(t, newDream.Priority, returnedDream.Priority)
 
 	// Router setup
-	w, c, router = RouterSetup()
+	w, c, router = RouterSetup(userID)
 
 	// Adding a new goal
 	c.Request = httptest.NewRequest(http.MethodPost, "/api/add-item/goal", bytes.NewReader(newGoalJson))
@@ -157,7 +142,7 @@ func TestAddItem(t *testing.T) {
 	assert.Equal(t, newGoal.ParentID, returnedGoal.ParentID)
 
 	// Router setup
-	w, c, router = RouterSetup()
+	w, c, router = RouterSetup(userID)
 
 	// Adding a new task
 	c.Request = httptest.NewRequest(http.MethodPost, "/api/add-item/task", bytes.NewReader(newTaskJson))
@@ -182,7 +167,7 @@ func TestAddItem(t *testing.T) {
 
 func TestUpdateItem(t *testing.T) {
 	// Router setup
-	w, c, router := RouterSetup()
+	w, c, router := RouterSetup(userID)
 
 	// Request data setup
 	dreamJson := []byte(`
@@ -226,7 +211,7 @@ func TestUpdateItem(t *testing.T) {
 	}
 
 	// Router setup
-	w, c, router = RouterSetup()
+	w, c, router = RouterSetup(userID)
 
 	c.Request = httptest.NewRequest(http.MethodPut, "/api/update-item/dream", bytes.NewReader(updatedJson))
 	router.ServeHTTP(w, c.Request)
@@ -248,7 +233,7 @@ func TestRemoveItem(t *testing.T) {
 	testutil.SeedDB()
 
 	// Router setup
-	w, c, router := RouterSetup()
+	w, c, router := RouterSetup(userID)
 
 	// Reading an item
 	var itemID uint64 = 1
@@ -261,7 +246,7 @@ func TestRemoveItem(t *testing.T) {
 	}
 
 	// Router setup
-	w, c, router = RouterSetup()
+	w, c, router = RouterSetup(userID)
 
 	// Counting the children of the item
 	c.Request = httptest.NewRequest(http.MethodGet, "/api/items", nil)
@@ -284,7 +269,7 @@ func TestRemoveItem(t *testing.T) {
 	assert.NotEqual(t, 0, beforeChildrenNum)
 
 	// Router setup
-	w, c, router = RouterSetup()
+	w, c, router = RouterSetup(userID)
 
 	// Removing the read item
 	c.Request = httptest.NewRequest(http.MethodDelete, fmt.Sprintf("/api/remove-item/%d", itemID), nil)
@@ -293,7 +278,7 @@ func TestRemoveItem(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	// Router setup
-	w, c, router = RouterSetup()
+	w, c, router = RouterSetup(userID)
 
 	// Reading the same item again
 	c.Request = httptest.NewRequest(http.MethodGet, fmt.Sprintf("/api/item/%d", itemID), nil)
@@ -307,7 +292,7 @@ func TestRemoveItem(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 
 	// Router setup
-	w, c, router = RouterSetup()
+	w, c, router = RouterSetup(userID)
 
 	// Counting the children of the item
 	c.Request = httptest.NewRequest(http.MethodGet, "/api/items", nil)
@@ -336,7 +321,7 @@ func TestUpdateItemProgress(t *testing.T) {
 	testutil.SeedDB()
 
 	// Router setup
-	w, c, router := RouterSetup()
+	w, c, router := RouterSetup(userID)
 
 	// Reading an item
 	var itemID uint64 = 1
@@ -351,7 +336,7 @@ func TestUpdateItemProgress(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	// Router setup
-	w, c, router = RouterSetup()
+	w, c, router = RouterSetup(userID)
 
 	// Updating item progress
 	requestJson := []byte(`
@@ -373,7 +358,7 @@ func TestUpdateItemProgress(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	// Router setup
-	w, c, router = RouterSetup()
+	w, c, router = RouterSetup(userID)
 
 	// Reading an item
 	c.Request = httptest.NewRequest(http.MethodGet, fmt.Sprintf("/api/item/%d", itemID), nil)

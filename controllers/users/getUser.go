@@ -16,11 +16,15 @@ type User struct {
 	Email       string       `json:"email"`
 	Birthday    o.NullString `json:"birthday"`
 	Gender      o.NullString `json:"gender"`
-	Country     o.NullString `json:"country"`
 	City        o.NullString `json:"city"`
 	Description o.NullString `json:"description"`
 	UpdatedAt   string       `json:"-"`
 	CreatedAt   string       `json:"createdAt"`
+}
+
+type ExistingUser struct {
+	User
+	Country o.NullString `json:"country"`
 }
 
 func GetUserInfoByClerkID(c *gin.Context) {
@@ -69,7 +73,7 @@ func GetUserInfo(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
-func getUserInfo(userID uint64) (user User, err error) {
+func getUserInfo(userID uint64) (user ExistingUser, err error) {
 	db.GetDB().Raw(`
 		SELECT u.user_id, u.clerk_id, u.username, u.email, u.birthday, u.gender, c.country, u.city, u.description, u.created_at 
 		FROM users u
@@ -79,7 +83,7 @@ func getUserInfo(userID uint64) (user User, err error) {
 	return user, err
 }
 
-func GetUserByClerkID(clerkID string) (user User, err error) {
+func GetUserByClerkID(clerkID string) (user ExistingUser, err error) {
 	db.GetDB().Raw(`
 		SELECT u.user_id, u.clerk_id, u.username, u.email, u.birthday, u.gender, c.country, u.city, u.description, u.created_at 
 		FROM users u

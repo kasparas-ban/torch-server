@@ -33,6 +33,7 @@ func RegisterRoutes(r *gin.Engine, useAuth bool) *gin.Engine {
 	api := r.Group("/api")
 	{
 		api.GET("/user-info", users.GetUserInfo)
+		api.POST("/add-user", users.AddNewUser)
 
 		api.GET("/items", items.GetAllItems)
 		api.GET("/item/:itemID", items.GetItem)
