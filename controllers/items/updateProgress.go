@@ -4,7 +4,7 @@ import (
 	"errors"
 	"net/http"
 	a "torch/torch-server/auth"
-	"torch/torch-server/db"
+	m "torch/torch-server/models"
 
 	"github.com/gin-gonic/gin"
 )
@@ -14,7 +14,7 @@ type UpdateItemProgressReq struct {
 	TimeSpent uint   `json:"timeSpent"`
 }
 
-func UpdateItemProgress(c *gin.Context) {
+func HandleUpdateItemProgress(c *gin.Context) {
 	userID := a.GetUserID(c)
 
 	var reqBody UpdateItemProgressReq
@@ -27,7 +27,7 @@ func UpdateItemProgress(c *gin.Context) {
 		return
 	}
 
-	err := updateProgress(userID, reqBody.ItemID, reqBody.TimeSpent)
+	err := m.UpdateProgress(userID, reqBody.ItemID, reqBody.TimeSpent)
 	if err != nil {
 		c.JSON(
 			http.StatusInternalServerError,
@@ -38,13 +38,4 @@ func UpdateItemProgress(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, nil)
-}
-
-func updateProgress(userID, itemID uint64, timeSpent uint) error {
-	err := db.GetDB().Exec(`
-		UPDATE items
-		SET time_spent = time_spent + ?
-		WHERE user_id = ? AND item_id = ?
-	`, timeSpent, userID, itemID).Error
-	return err
 }

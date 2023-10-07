@@ -24,3 +24,6 @@ Note that all images built this way will be cached and reused with each later la
 
 - [ ] Use UUIDs
 - [ ] Check if code is SQL injection-prone
+- [ ] Try to implement optional for Reccuring struct
+- [x] Refactor items
+- [ ] Stored Procedures for items

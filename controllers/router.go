@@ -37,13 +37,12 @@ func RegisterRoutes(r *gin.Engine, useAuth bool) *gin.Engine {
 		api.PUT("/update-user", users.HandleUpdateUser)
 		api.DELETE("/delete-user", users.HandleDeleteUser)
 
-		api.GET("/items", items.GetAllItems)
-		api.GET("/item/:itemID", items.GetItem)
-		api.POST("/add-item/:type", items.AddItem)
-
-		api.DELETE("/remove-item/:itemID", items.RemoveItem)
-		api.PUT("/update-item/:type", items.UpdateItem)
-		api.PUT("/update-item-progress", items.UpdateItemProgress)
+		api.GET("/items", items.HandleGetAllItems)
+		api.GET("/item/:itemID", items.HandleGetItem)
+		api.POST("/add-item/:type", items.HandleAddItem)
+		api.DELETE("/remove-item/:itemID", items.HandleRemoveItem)
+		api.PUT("/update-item/:type", items.HandleUpdateItem)
+		api.PUT("/update-item-progress", items.HandleUpdateItemProgress)
 
 		api.GET("/timer-history", history.GetTimerHistory)
 		api.PUT("/add-timer-record", history.UpsertTimerHistory)

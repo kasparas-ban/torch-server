@@ -5,12 +5,12 @@ import (
 	"net/http"
 	"strconv"
 	a "torch/torch-server/auth"
-	"torch/torch-server/db"
+	m "torch/torch-server/models"
 
 	"github.com/gin-gonic/gin"
 )
 
-func RemoveItem(c *gin.Context) {
+func HandleRemoveItem(c *gin.Context) {
 	userID := a.GetUserID(c)
 
 	itemID, err := strconv.ParseUint(c.Param("itemID"), 10, 64)
@@ -23,7 +23,7 @@ func RemoveItem(c *gin.Context) {
 		return
 	}
 
-	err = remove(userID, itemID)
+	err = m.RemoveItem(userID, itemID)
 	if err != nil {
 		c.JSON(
 			http.StatusInternalServerError,
@@ -34,12 +34,4 @@ func RemoveItem(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, nil)
-}
-
-func remove(userID, itemID uint64) error {
-	err := db.GetDB().Exec(`
-		CALL DeleteItem(?, ?)
-	`, userID, itemID).Error
-
-	return err
 }

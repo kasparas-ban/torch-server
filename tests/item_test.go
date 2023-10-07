@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"testing"
 	"torch/torch-server/controllers/items"
+	"torch/torch-server/models"
 	"torch/torch-server/testutil"
 
 	"github.com/stretchr/testify/assert"
@@ -23,7 +24,7 @@ func TestGetEmptyList(t *testing.T) {
 	c.Request = httptest.NewRequest(http.MethodGet, "/api/items", nil)
 	router.ServeHTTP(w, c.Request)
 
-	var items []items.Item
+	var items []models.Item
 	if err := json.Unmarshal(w.Body.Bytes(), &items); err != nil {
 		t.Fatal(err)
 	}
@@ -45,7 +46,7 @@ func TestGetAllItems(t *testing.T) {
 	c.Request = httptest.NewRequest(http.MethodGet, "/api/items", nil)
 	router.ServeHTTP(w, c.Request)
 
-	var items []items.Item
+	var items []models.Item
 	if err := json.Unmarshal(w.Body.Bytes(), &items); err != nil {
 		t.Fatal(err)
 	}
@@ -89,19 +90,19 @@ func TestAddItem(t *testing.T) {
 		}
 	`)
 
-	var newDream items.Item
+	var newDream models.Item
 	err := json.Unmarshal(newDreamJson, &newDream)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	var newGoal items.Item
+	var newGoal models.Item
 	err = json.Unmarshal(newGoalJson, &newGoal)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	var newTask items.Item
+	var newTask models.Item
 	err = json.Unmarshal(newTaskJson, &newTask)
 	if err != nil {
 		t.Fatal(err)
@@ -111,7 +112,7 @@ func TestAddItem(t *testing.T) {
 	c.Request = httptest.NewRequest(http.MethodPost, "/api/add-item/dream", bytes.NewReader(newDreamJson))
 	router.ServeHTTP(w, c.Request)
 
-	var returnedDream items.Item
+	var returnedDream models.Item
 	if err := json.Unmarshal(w.Body.Bytes(), &returnedDream); err != nil {
 		t.Fatal(err)
 	}
@@ -129,7 +130,7 @@ func TestAddItem(t *testing.T) {
 	c.Request = httptest.NewRequest(http.MethodPost, "/api/add-item/goal", bytes.NewReader(newGoalJson))
 	router.ServeHTTP(w, c.Request)
 
-	var returnedGoal items.Item
+	var returnedGoal models.Item
 	if err := json.Unmarshal(w.Body.Bytes(), &returnedGoal); err != nil {
 		t.Fatal(err)
 	}
@@ -148,7 +149,7 @@ func TestAddItem(t *testing.T) {
 	c.Request = httptest.NewRequest(http.MethodPost, "/api/add-item/task", bytes.NewReader(newTaskJson))
 	router.ServeHTTP(w, c.Request)
 
-	var returnedTask items.Item
+	var returnedTask models.Item
 	if err := json.Unmarshal(w.Body.Bytes(), &returnedTask); err != nil {
 		t.Fatal(err)
 	}
@@ -179,7 +180,7 @@ func TestUpdateItem(t *testing.T) {
 		}
 	`)
 
-	var dream items.Item
+	var dream models.Item
 	err := json.Unmarshal(dreamJson, &dream)
 	if err != nil {
 		t.Fatal(err)
@@ -189,7 +190,7 @@ func TestUpdateItem(t *testing.T) {
 	c.Request = httptest.NewRequest(http.MethodPost, "/api/add-item/dream", bytes.NewReader(dreamJson))
 	router.ServeHTTP(w, c.Request)
 
-	var returnedDream items.Item
+	var returnedDream models.Item
 	if err := json.Unmarshal(w.Body.Bytes(), &returnedDream); err != nil {
 		t.Fatal(err)
 	}
@@ -204,7 +205,7 @@ func TestUpdateItem(t *testing.T) {
 		}
 	`)
 
-	var updatedDream items.ExistingDream
+	var updatedDream models.ExistingDream
 	err = json.Unmarshal(updatedJson, &updatedDream)
 	if err != nil {
 		t.Fatal(err)
@@ -240,7 +241,7 @@ func TestRemoveItem(t *testing.T) {
 	c.Request = httptest.NewRequest(http.MethodGet, fmt.Sprintf("/api/item/%d", itemID), nil)
 	router.ServeHTTP(w, c.Request)
 
-	var item items.Item
+	var item models.Item
 	if err := json.Unmarshal(w.Body.Bytes(), &item); err != nil {
 		t.Fatal(err)
 	}
@@ -252,7 +253,7 @@ func TestRemoveItem(t *testing.T) {
 	c.Request = httptest.NewRequest(http.MethodGet, "/api/items", nil)
 	router.ServeHTTP(w, c.Request)
 
-	var readItems []items.Item
+	var readItems []models.Item
 	if err := json.Unmarshal(w.Body.Bytes(), &readItems); err != nil {
 		t.Fatal(err)
 	}
@@ -284,7 +285,7 @@ func TestRemoveItem(t *testing.T) {
 	c.Request = httptest.NewRequest(http.MethodGet, fmt.Sprintf("/api/item/%d", itemID), nil)
 	router.ServeHTTP(w, c.Request)
 
-	var test items.Item
+	var test models.Item
 	if err := json.Unmarshal(w.Body.Bytes(), &test); err != nil {
 		t.Fatal(err)
 	}
@@ -328,7 +329,7 @@ func TestUpdateItemProgress(t *testing.T) {
 	c.Request = httptest.NewRequest(http.MethodGet, fmt.Sprintf("/api/item/%d", itemID), nil)
 	router.ServeHTTP(w, c.Request)
 
-	var item items.Item
+	var item models.Item
 	if err := json.Unmarshal(w.Body.Bytes(), &item); err != nil {
 		t.Fatal(err)
 	}
@@ -364,7 +365,7 @@ func TestUpdateItemProgress(t *testing.T) {
 	c.Request = httptest.NewRequest(http.MethodGet, fmt.Sprintf("/api/item/%d", itemID), nil)
 	router.ServeHTTP(w, c.Request)
 
-	var updatedItem items.Item
+	var updatedItem models.Item
 	if err := json.Unmarshal(w.Body.Bytes(), &updatedItem); err != nil {
 		t.Fatal(err)
 	}
