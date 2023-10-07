@@ -370,6 +370,23 @@ END;
 DELIMITER ;
 
 DELIMITER //
+CREATE PROCEDURE UpdateUser(IN userID BIGINT UNSIGNED, newUsername VARCHAR(30), newEmail VARCHAR(255), newBirthday DATE, newGender ENUM('MALE', 'FEMALE', 'OTHER'), newCountryID TINYINT UNSIGNED, newCity VARCHAR(255), newDescription VARCHAR(300))
+BEGIN
+    START TRANSACTION;
+
+    UPDATE users SET username = newUsername, email = newEmail, birthday = newBirthday, gender = newGender, country_id = newCountryID, city = newCity, `description` = newDescription WHERE user_id = userID;
+
+    SELECT u.user_id, u.clerk_id, u.username, u.email, u.birthday, u.gender, c.country, u.city, u.description, u.created_at 
+		FROM users u
+		LEFT JOIN countries c ON u.country_id = c.country_id
+		WHERE u.user_id = userID LIMIT 1;
+
+    COMMIT;
+END;
+//
+DELIMITER ;
+
+DELIMITER //
 CREATE PROCEDURE DeleteUser(IN userID BIGINT UNSIGNED)
 BEGIN
     START TRANSACTION;

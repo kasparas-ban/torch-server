@@ -11,6 +11,7 @@ import (
 
 	"github.com/docker/go-connections/nat"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/mysql"
 )
@@ -139,4 +140,8 @@ func CleanAllTables() {
 	if err != nil {
 		panic("Failed to clean all tables")
 	}
+}
+
+func RandomClientID() string {
+	return uuid.NewString()[:20]
 }
