@@ -44,8 +44,8 @@ func RegisterRoutes(r *gin.Engine, useAuth bool) *gin.Engine {
 		api.PUT("/update-item/:type", items.HandleUpdateItem)
 		api.PUT("/update-item-progress", items.HandleUpdateItemProgress)
 
-		api.GET("/timer-history", history.GetTimerHistory)
-		api.PUT("/add-timer-record", history.UpsertTimerHistory)
+		api.GET("/timer-history", history.HandleGetTimerHistory)
+		api.PUT("/add-timer-record", history.HandleUpsertTimerHistory)
 	}
 
 	return r
