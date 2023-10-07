@@ -19,3 +19,8 @@ To stop and remove Docker containers run
 `docker-compose down`
 
 Note that all images built this way will be cached and reused with each later launch.
+
+## TODOS
+
+- [ ] Use UUIDs
+- [ ] Check if code is SQL injection-prone

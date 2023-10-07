@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"torch/torch-server/controllers/users"
+	"torch/torch-server/models"
 	"torch/torch-server/testutil"
 
 	"github.com/stretchr/testify/assert"
@@ -33,7 +33,7 @@ func TestAddUser(t *testing.T) {
 		}
 	`)
 
-	var requestBody users.NewUser
+	var requestBody models.NewUser
 	err := json.Unmarshal(requestJson, &requestBody)
 	if err != nil {
 		t.Fatal(err)
@@ -42,7 +42,7 @@ func TestAddUser(t *testing.T) {
 	c.Request = httptest.NewRequest(http.MethodPost, "/api/add-user", bytes.NewReader(requestJson))
 	router.ServeHTTP(w, c.Request)
 
-	var addedUser users.ExistingUser
+	var addedUser models.ExistingUser
 	if err := json.Unmarshal(w.Body.Bytes(), &addedUser); err != nil {
 		t.Fatal(err)
 	}
@@ -64,7 +64,7 @@ func TestAddUser(t *testing.T) {
 	c.Request = httptest.NewRequest(http.MethodGet, "/api/user-info", nil)
 	router.ServeHTTP(w, c.Request)
 
-	var user users.ExistingUser
+	var user models.ExistingUser
 	if err := json.Unmarshal(w.Body.Bytes(), &user); err != nil {
 		t.Fatal(err)
 	}

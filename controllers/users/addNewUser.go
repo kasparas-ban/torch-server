@@ -3,18 +3,12 @@ package users
 import (
 	"errors"
 	"net/http"
-	"torch/torch-server/db"
-	o "torch/torch-server/optional"
+	m "torch/torch-server/models"
 
 	"github.com/gin-gonic/gin"
 )
 
-type NewUser struct {
-	User
-	CountryID o.NullUint8 `json:"countryID"`
-}
-
-func AddNewUser(c *gin.Context) {
+func HandleAddNewUser(c *gin.Context) {
 	clerkID := c.GetString("clerkID")
 	if clerkID != "" {
 		c.JSON(
@@ -24,7 +18,7 @@ func AddNewUser(c *gin.Context) {
 		c.Abort()
 	}
 
-	var userReq NewUser
+	var userReq m.NewUser
 	if err := c.BindJSON(&userReq); err != nil {
 		c.JSON(
 			http.StatusBadRequest,
@@ -33,7 +27,7 @@ func AddNewUser(c *gin.Context) {
 		c.Abort()
 	}
 
-	user, err := addUser(clerkID, userReq)
+	user, err := m.AddUser(clerkID, userReq)
 	if err != nil {
 		c.JSON(
 			http.StatusInternalServerError,
@@ -44,13 +38,4 @@ func AddNewUser(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, user)
-}
-
-func addUser(clerkID string, u NewUser) (ExistingUser, error) {
-	var newUser ExistingUser
-	err := db.GetDB().Raw(`
-		CALL AddUser(?, ?, ?, ?, ?, ?, ?, ?)
-	`, clerkID, u.Username, u.Email, u.Birthday, u.Gender, u.CountryID, u.City, u.Description).Scan(&newUser).Error
-
-	return newUser, err
 }
