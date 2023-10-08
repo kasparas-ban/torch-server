@@ -362,7 +362,7 @@ BEGIN
     
     INSERT INTO users (public_user_id, clerk_id, username, email, birthday, gender, country_id, city, `description`) VALUES (publicUserId, newClerkID, newUsername, newEmail, newBirthday, newGender, newCountryID, newCity, newDescription);
 
-    SELECT u.user_id, u.clerk_id, u.username, u.email, u.birthday, u.gender, c.country, u.city, u.description, u.created_at 
+    SELECT u.public_user_id, u.clerk_id, u.username, u.email, u.birthday, u.gender, c.country, u.city, u.description, u.created_at 
 		FROM users u
 		LEFT JOIN countries c ON u.country_id = c.country_id
 		WHERE u.user_id = LAST_INSERT_ID() LIMIT 1;
@@ -379,7 +379,7 @@ BEGIN
 
     UPDATE users SET username = newUsername, email = newEmail, birthday = newBirthday, gender = newGender, country_id = newCountryID, city = newCity, `description` = newDescription WHERE user_id = userID;
 
-    SELECT u.user_id, u.clerk_id, u.username, u.email, u.birthday, u.gender, c.country, u.city, u.description, u.created_at 
+    SELECT u.public_user_id, u.clerk_id, u.username, u.email, u.birthday, u.gender, c.country, u.city, u.description, u.created_at 
 		FROM users u
 		LEFT JOIN countries c ON u.country_id = c.country_id
 		WHERE u.user_id = userID LIMIT 1;

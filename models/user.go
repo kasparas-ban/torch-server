@@ -33,7 +33,7 @@ type NewUser struct {
 func GetUserInfo(userID uint64) (ExistingUser, error) {
 	var user ExistingUser
 	err := db.GetDB().Raw(`
-		SELECT u.user_id, u.clerk_id, u.username, u.email, u.birthday, u.gender, c.country, u.city, u.description, u.created_at 
+		SELECT u.public_user_id, u.clerk_id, u.username, u.email, u.birthday, u.gender, c.country, u.city, u.description, u.created_at 
 		FROM users u
 		LEFT JOIN countries c ON u.country_id = c.country_id
 		WHERE u.user_id = ? LIMIT 1
@@ -44,7 +44,7 @@ func GetUserInfo(userID uint64) (ExistingUser, error) {
 func GetUserByClerkID(clerkID string) (ExistingUser, error) {
 	var user ExistingUser
 	err := db.GetDB().Raw(`
-		SELECT u.user_id, u.clerk_id, u.username, u.email, u.birthday, u.gender, c.country, u.city, u.description, u.created_at 
+		SELECT u.public_user_id, u.clerk_id, u.username, u.email, u.birthday, u.gender, c.country, u.city, u.description, u.created_at 
 		FROM users u
 		LEFT JOIN countries c ON u.country_id = c.country_id
 		WHERE u.clerk_id = ? LIMIT 1

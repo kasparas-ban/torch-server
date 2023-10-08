@@ -12,6 +12,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+var numUsersInDB = 3
+
 func TestAddUser(t *testing.T) {
 	testutil.CleanAllTables()
 	testutil.SeedDB()
@@ -57,7 +59,7 @@ func TestAddUser(t *testing.T) {
 	assert.Equal(t, requestBody.Description, addedUser.Description)
 
 	// Router setup
-	userID = uint64(addedUser.UserID)
+	userID = uint64(numUsersInDB + 1)
 	w, c, router = RouterSetup(userID)
 
 	// Getting user info
@@ -86,7 +88,7 @@ func TestDeleteUser(t *testing.T) {
 	testutil.SeedDB()
 
 	// Router setup
-	userID = uint64(1)
+	userID = uint64(0)
 	w, c, router := RouterSetup(userID)
 
 	// Adding a new user
@@ -119,22 +121,24 @@ func TestDeleteUser(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	// Router setup
-	userID = uint64(addedUser.UserID)
+	userID = uint64(numUsersInDB + 1)
 	w, c, router = RouterSetup(userID)
 
 	// Deleting the user
 	c.Request = httptest.NewRequest(http.MethodDelete, "/api/delete-user", nil)
 	router.ServeHTTP(w, c.Request)
 
+	assert.Equal(t, http.StatusOK, w.Code)
+
 	// Router setup
-	userID = uint64(addedUser.UserID)
+	userID = uint64(numUsersInDB + 1)
 	w, c, router = RouterSetup(userID)
 
 	// Getting deleted user info
 	c.Request = httptest.NewRequest(http.MethodGet, "/api/user-info", nil)
 	router.ServeHTTP(w, c.Request)
 
-	assert.Equal(t, http.StatusNotFound, w.Code)
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
 
 	testutil.CleanAllTables()
 }
@@ -144,6 +148,7 @@ func TestUpdateUser(t *testing.T) {
 	testutil.SeedDB()
 
 	// Router setup
+	userID = uint64(0)
 	w, c, router := RouterSetup(userID)
 
 	// Adding a new user
@@ -176,13 +181,12 @@ func TestUpdateUser(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	// Router setup
-	userID = uint64(addedUser.UserID)
+	userID = uint64(numUsersInDB + 1)
 	w, c, router = RouterSetup(userID)
 
 	// Updating the user
 	requestJson = []byte(`
 		{
-			"userID": 4,
 			"username": "updated_new_user",
 			"email": "updated_test_email@gmail.com",
 			"birthday": "2010-01-01",
@@ -203,7 +207,7 @@ func TestUpdateUser(t *testing.T) {
 	router.ServeHTTP(w, c.Request)
 
 	// Router setup
-	userID = uint64(addedUser.UserID)
+	userID = uint64(numUsersInDB + 1)
 	w, c, router = RouterSetup(userID)
 
 	// Getting the updated user's info

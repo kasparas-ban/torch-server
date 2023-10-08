@@ -26,10 +26,7 @@ func NewNullRecurring(val interface{}) NullRecurring {
 }
 
 func (ni *NullRecurring) Scan(value interface{}) error {
-	fmt.Printf("\n Scan START : %v \n", value)
-
 	if val, ok := value.(NullRecurring); ok {
-		fmt.Printf("\n Scan: %v %v \n", val.Val, val.IsValid)
 		ni.Val, ni.IsValid = val.Val, val.IsValid
 	}
 
@@ -37,8 +34,6 @@ func (ni *NullRecurring) Scan(value interface{}) error {
 }
 
 func (ni NullRecurring) Value() (driver.Value, error) {
-	fmt.Printf("\n VALUE : %v \n", ni)
-
 	if !ni.IsValid {
 		return nil, nil
 	}
@@ -46,7 +41,6 @@ func (ni NullRecurring) Value() (driver.Value, error) {
 }
 
 func (ni *NullRecurring) Set(val interface{}) {
-	fmt.Printf("\n SET : %v \n", ni)
 	ni.Val, ni.IsValid = val.(NullRecurring).Val, val.(NullRecurring).IsValid
 }
 

@@ -1,7 +1,6 @@
 package users
 
 import (
-	"errors"
 	"net/http"
 	m "torch/torch-server/models"
 
@@ -13,17 +12,17 @@ func HandleUpdateUser(c *gin.Context) {
 	if err := c.BindJSON(&userReq); err != nil {
 		c.JSON(
 			http.StatusBadRequest,
-			gin.H{"error": errors.New("Invalid user object")},
+			gin.H{"error": "Invalid user object"},
 		)
 		c.Abort()
 	}
 	userReq.UserID = c.GetUint64("userID")
 
 	updatedUser, err := m.UpdateUser(userReq)
-	if err != nil || updatedUser.UserID == 0 {
+	if err != nil {
 		c.JSON(
 			http.StatusInternalServerError,
-			gin.H{"error": errors.New("Failed to update the user")},
+			gin.H{"error": "Failed to update the user"},
 		)
 		c.Abort()
 		return

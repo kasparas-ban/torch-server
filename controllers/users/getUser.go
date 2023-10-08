@@ -1,7 +1,6 @@
 package users
 
 import (
-	"errors"
 	"net/http"
 	"torch/torch-server/models"
 
@@ -19,18 +18,10 @@ func HandleGetUserInfo(c *gin.Context) {
 	}
 
 	user, err := models.GetUserInfo(userID)
-	if err != nil {
+	if err != nil || user.PublicUserID == "" {
 		c.JSON(
 			http.StatusInternalServerError,
-			gin.H{"error": errors.New("Failed to get user info")},
-		)
-		c.Abort()
-		return
-	}
-	if user.UserID == 0 {
-		c.JSON(
-			http.StatusNotFound,
-			gin.H{"error": errors.New("User not found")},
+			gin.H{"error": "Failed to get user info"},
 		)
 		c.Abort()
 		return
@@ -44,7 +35,7 @@ func GetUserInfoByClerkID(c *gin.Context) {
 	if clerkID != "" {
 		c.JSON(
 			http.StatusBadRequest,
-			gin.H{"error": errors.New("Could not find clerkID")},
+			gin.H{"error": "Could not find clerkID"},
 		)
 		c.Abort()
 	}
@@ -61,7 +52,7 @@ func GetUserInfoByClerkID(c *gin.Context) {
 	if user.UserID == 0 {
 		c.JSON(
 			http.StatusNotFound,
-			gin.H{"error": errors.New("User not found")},
+			gin.H{"error": "User not found"},
 		)
 		c.Abort()
 		return
