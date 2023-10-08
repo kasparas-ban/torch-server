@@ -17,13 +17,7 @@ func HandleUpdateUser(c *gin.Context) {
 		)
 		c.Abort()
 	}
-	if userReq.UserID == 0 {
-		c.JSON(
-			http.StatusBadRequest,
-			gin.H{"error": errors.New("User ID is missing")},
-		)
-		c.Abort()
-	}
+	userReq.UserID = c.GetUint64("userID")
 
 	updatedUser, err := m.UpdateUser(userReq)
 	if err != nil || updatedUser.UserID == 0 {

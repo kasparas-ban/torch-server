@@ -3,19 +3,21 @@ package models
 import (
 	"torch/torch-server/db"
 	o "torch/torch-server/optional"
+	"torch/torch-server/util"
 )
 
 type User struct {
-	UserID      uint64       `json:"userID"`
-	ClerkID     string       `json:"-"`
-	Username    string       `json:"username"`
-	Email       string       `json:"email"`
-	Birthday    o.NullString `json:"birthday"`
-	Gender      o.NullString `json:"gender"`
-	City        o.NullString `json:"city"`
-	Description o.NullString `json:"description"`
-	UpdatedAt   string       `json:"-"`
-	CreatedAt   string       `json:"createdAt"`
+	UserID       uint64       `json:"-"`
+	PublicUserID string       `json:"userID"`
+	ClerkID      string       `json:"-"`
+	Username     string       `json:"username"`
+	Email        string       `json:"email"`
+	Birthday     o.NullString `json:"birthday"`
+	Gender       o.NullString `json:"gender"`
+	City         o.NullString `json:"city"`
+	Description  o.NullString `json:"description"`
+	UpdatedAt    string       `json:"-"`
+	CreatedAt    string       `json:"createdAt"`
 }
 
 type ExistingUser struct {
@@ -52,9 +54,14 @@ func GetUserByClerkID(clerkID string) (ExistingUser, error) {
 
 func AddUser(clerkID string, u NewUser) (ExistingUser, error) {
 	var newUser ExistingUser
-	err := db.GetDB().Raw(`
-		CALL AddUser(?, ?, ?, ?, ?, ?, ?, ?)
-	`, clerkID, u.Username, u.Email, u.Birthday, u.Gender, u.CountryID, u.City, u.Description).Scan(&newUser).Error
+	publicUserID, err := util.New()
+	if err != nil {
+		return newUser, err
+	}
+
+	err = db.GetDB().Raw(`
+		CALL AddUser(?, ?, ?, ?, ?, ?, ?, ?, ?)
+	`, publicUserID, clerkID, u.Username, u.Email, u.Birthday, u.Gender, u.CountryID, u.City, u.Description).Scan(&newUser).Error
 
 	return newUser, err
 }

@@ -268,7 +268,8 @@ INSERT INTO `countries` (`country_id`, `country_code`, `country`) VALUES
 
 -- Users table
 CREATE TABLE IF NOT EXISTS `users` (
-  `user_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `user_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `public_user_id` VARCHAR(12) NOT NULL,
   `clerk_id` VARCHAR(50) NOT NULL,
   `username` VARCHAR(30) NOT NULL,
   `email` VARCHAR(255) NOT NULL,
@@ -279,6 +280,8 @@ CREATE TABLE IF NOT EXISTS `users` (
   `description` VARCHAR(300),
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `idx_public_user_id` (`public_user_id`),
   INDEX `idx_clerk_id` (`clerk_id`)
 )
 ENGINE = InnoDB
@@ -353,11 +356,11 @@ END;
 DELIMITER ;
 
 DELIMITER //
-CREATE PROCEDURE AddUser(IN newClerkID VARCHAR(50), newUsername VARCHAR(30), newEmail VARCHAR(255), newBirthday DATE, newGender ENUM('MALE', 'FEMALE', 'OTHER'), newCountryID TINYINT UNSIGNED, newCity VARCHAR(255), newDescription VARCHAR(300))
+CREATE PROCEDURE AddUser(IN publicUserId VARCHAR(12), newClerkID VARCHAR(50), newUsername VARCHAR(30), newEmail VARCHAR(255), newBirthday DATE, newGender ENUM('MALE', 'FEMALE', 'OTHER'), newCountryID TINYINT UNSIGNED, newCity VARCHAR(255), newDescription VARCHAR(300))
 BEGIN
     START TRANSACTION;
     
-    INSERT INTO users (clerk_id, username, email, birthday, gender, country_id, city, `description`) VALUES (newClerkID, newUsername, newEmail, newBirthday, newGender, newCountryID, newCity, newDescription);
+    INSERT INTO users (public_user_id, clerk_id, username, email, birthday, gender, country_id, city, `description`) VALUES (publicUserId, newClerkID, newUsername, newEmail, newBirthday, newGender, newCountryID, newCity, newDescription);
 
     SELECT u.user_id, u.clerk_id, u.username, u.email, u.birthday, u.gender, c.country, u.city, u.description, u.created_at 
 		FROM users u
