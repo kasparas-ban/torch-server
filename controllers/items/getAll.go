@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strconv"
 
 	m "torch/torch-server/models"
 
@@ -36,8 +35,8 @@ func HandleGetAllItems(c *gin.Context) {
 }
 
 func HandleGetItem(c *gin.Context) {
-	itemID, err := strconv.ParseUint(c.Param("itemID"), 10, 64)
-	if err != nil {
+	publicItemID := c.Param("itemID")
+	if publicItemID == "" {
 		c.JSON(
 			http.StatusBadRequest,
 			gin.H{"error": errors.New("Invalid item ID")},
@@ -56,7 +55,7 @@ func HandleGetItem(c *gin.Context) {
 		return
 	}
 
-	item, err := m.GetItemByUser(userID, itemID)
+	item, err := m.GetItemByUser(userID, publicItemID)
 	if err != nil {
 		c.JSON(
 			http.StatusInternalServerError,
@@ -65,10 +64,10 @@ func HandleGetItem(c *gin.Context) {
 		c.Abort()
 		return
 	}
-	if item.ItemID == 0 {
+	if item.PublicItemID == "" {
 		c.JSON(
 			http.StatusBadRequest,
-			gin.H{"error": fmt.Sprintf("Could not find item with ID %d", itemID)},
+			gin.H{"error": fmt.Sprintf("Could not find item with ID %s", publicItemID)},
 		)
 		c.Abort()
 		return

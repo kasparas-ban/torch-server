@@ -5,6 +5,7 @@ import (
 	"net/http"
 	a "torch/torch-server/auth"
 	m "torch/torch-server/models"
+	"torch/torch-server/util"
 
 	"github.com/gin-gonic/gin"
 )
@@ -40,7 +41,17 @@ func SaveItem[T m.GeneralItem](c *gin.Context, userID uint64) {
 		c.Abort()
 	}
 
-	item, err := newItem.AddItem(userID)
+	publicItemID, err := util.New()
+	if err != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{"error": errors.New("Failed to save the item")},
+		)
+		c.Abort()
+		return
+	}
+
+	item, err := newItem.AddItem(userID, publicItemID)
 	if err != nil {
 		c.JSON(
 			http.StatusInternalServerError,

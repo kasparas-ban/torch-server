@@ -22,7 +22,8 @@ Note that all images built this way will be cached and reused with each later la
 
 ## TODOS
 
-- [ ] Use UUIDs
+- [x] Use nanoid's for userID's
+- [x] Use nanoid's for itemID's
 - [ ] Check if code is SQL injection-prone
 - [ ] Try to implement optional for Reccuring struct
 - [x] Refactor items

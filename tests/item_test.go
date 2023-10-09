@@ -58,35 +58,18 @@ func TestGetAllItems(t *testing.T) {
 }
 
 func TestAddItem(t *testing.T) {
+	testutil.CleanAllTables()
+
 	// Router setup
 	w, c, router := RouterSetup(userID)
 
-	// Request data setup
+	// Adding a new dream
 	newDreamJson := []byte(`
 		{
 			"title": "Test dream",
 			"type": "DREAM",
 			"priority": "MEDIUM",
 			"targetDate": "2024-02-01"
-		}
-	`)
-	newGoalJson := []byte(`
-		{
-			"title": "Test goal",
-			"type": "GOAL",
-			"targetDate": "2024-01-01",
-			"priority": "HIGH",
-			"parentID": 1
-		}
-	`)
-	newTaskJson := []byte(`
-		{
-			"title": "Test task",
-			"type": "TASK",
-			"targetDate": "2024-01-01",
-			"priority": "HIGH",
-			"duration": 36000,
-			"parentID": 2
 		}
 	`)
 
@@ -96,19 +79,6 @@ func TestAddItem(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	var newGoal models.Item
-	err = json.Unmarshal(newGoalJson, &newGoal)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	var newTask models.Item
-	err = json.Unmarshal(newTaskJson, &newTask)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	// Adding a new dream
 	c.Request = httptest.NewRequest(http.MethodPost, "/api/add-item/dream", bytes.NewReader(newDreamJson))
 	router.ServeHTTP(w, c.Request)
 
@@ -127,6 +97,22 @@ func TestAddItem(t *testing.T) {
 	w, c, router = RouterSetup(userID)
 
 	// Adding a new goal
+	newGoalJson := []byte(fmt.Sprintf(`
+		{
+			"title": "Test goal",
+			"type": "GOAL",
+			"targetDate": "2024-01-01",
+			"priority": "HIGH",
+			"parentID": "%s"
+		}
+	`, returnedDream.PublicItemID))
+
+	var newGoal models.Item
+	err = json.Unmarshal(newGoalJson, &newGoal)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	c.Request = httptest.NewRequest(http.MethodPost, "/api/add-item/goal", bytes.NewReader(newGoalJson))
 	router.ServeHTTP(w, c.Request)
 
@@ -146,6 +132,23 @@ func TestAddItem(t *testing.T) {
 	w, c, router = RouterSetup(userID)
 
 	// Adding a new task
+	newTaskJson := []byte(fmt.Sprintf(`
+		{
+			"title": "Test task",
+			"type": "TASK",
+			"targetDate": "2024-01-01",
+			"priority": "HIGH",
+			"duration": 36000,
+			"parentID": "%s"
+		}
+	`, returnedGoal.PublicItemID))
+
+	var newTask models.Item
+	err = json.Unmarshal(newTaskJson, &newTask)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	c.Request = httptest.NewRequest(http.MethodPost, "/api/add-item/task", bytes.NewReader(newTaskJson))
 	router.ServeHTTP(w, c.Request)
 
@@ -195,24 +198,26 @@ func TestUpdateItem(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	// Router setup
+	w, c, router = RouterSetup(userID)
+
 	// Updating the added dream
-	updatedJson := []byte(`
+	updatedJson := []byte(fmt.Sprintf(`
 		{
-			"itemID": 1,
+			"itemID": "%s",
 			"title": "New title",
 			"priority": "HIGH",
 			"targetDate": "2024-02-01"
 		}
-	`)
+	`, returnedDream.PublicItemID))
 
 	var updatedDream models.ExistingDream
 	err = json.Unmarshal(updatedJson, &updatedDream)
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	// Router setup
-	w, c, router = RouterSetup(userID)
 
 	c.Request = httptest.NewRequest(http.MethodPut, "/api/update-item/dream", bytes.NewReader(updatedJson))
 	router.ServeHTTP(w, c.Request)
@@ -237,8 +242,8 @@ func TestRemoveItem(t *testing.T) {
 	w, c, router := RouterSetup(userID)
 
 	// Reading an item
-	var itemID uint64 = 1
-	c.Request = httptest.NewRequest(http.MethodGet, fmt.Sprintf("/api/item/%d", itemID), nil)
+	var publicItemID string = "1ax1usfu2uku"
+	c.Request = httptest.NewRequest(http.MethodGet, fmt.Sprintf("/api/item/%s", publicItemID), nil)
 	router.ServeHTTP(w, c.Request)
 
 	var item models.Item
@@ -260,7 +265,7 @@ func TestRemoveItem(t *testing.T) {
 
 	beforeChildrenNum := 0
 	for _, item := range readItems {
-		if item.ParentID.Valid && item.ParentID.Val == itemID {
+		if item.ParentID.IsValid && item.ParentID.Val == publicItemID {
 			beforeChildrenNum += 1
 		}
 	}
@@ -273,7 +278,7 @@ func TestRemoveItem(t *testing.T) {
 	w, c, router = RouterSetup(userID)
 
 	// Removing the read item
-	c.Request = httptest.NewRequest(http.MethodDelete, fmt.Sprintf("/api/remove-item/%d", itemID), nil)
+	c.Request = httptest.NewRequest(http.MethodDelete, fmt.Sprintf("/api/remove-item/%s", publicItemID), nil)
 	router.ServeHTTP(w, c.Request)
 
 	assert.Equal(t, http.StatusOK, w.Code)
@@ -282,7 +287,7 @@ func TestRemoveItem(t *testing.T) {
 	w, c, router = RouterSetup(userID)
 
 	// Reading the same item again
-	c.Request = httptest.NewRequest(http.MethodGet, fmt.Sprintf("/api/item/%d", itemID), nil)
+	c.Request = httptest.NewRequest(http.MethodGet, fmt.Sprintf("/api/item/%s", publicItemID), nil)
 	router.ServeHTTP(w, c.Request)
 
 	var test models.Item
@@ -305,7 +310,7 @@ func TestRemoveItem(t *testing.T) {
 
 	afterChildrenNum := 0
 	for _, item := range readItems {
-		if item.ParentID.Valid && item.ParentID.Val == itemID {
+		if item.ParentID.IsValid && item.ParentID.Val == publicItemID {
 			afterChildrenNum += 1
 		}
 	}
@@ -322,11 +327,12 @@ func TestUpdateItemProgress(t *testing.T) {
 	testutil.SeedDB()
 
 	// Router setup
+	userID = uint64(1)
 	w, c, router := RouterSetup(userID)
 
 	// Reading an item
-	var itemID uint64 = 1
-	c.Request = httptest.NewRequest(http.MethodGet, fmt.Sprintf("/api/item/%d", itemID), nil)
+	var publicItemID string = "1ax1usfu2uku"
+	c.Request = httptest.NewRequest(http.MethodGet, fmt.Sprintf("/api/item/%s", publicItemID), nil)
 	router.ServeHTTP(w, c.Request)
 
 	var item models.Item
@@ -340,12 +346,12 @@ func TestUpdateItemProgress(t *testing.T) {
 	w, c, router = RouterSetup(userID)
 
 	// Updating item progress
-	requestJson := []byte(`
+	requestJson := []byte(fmt.Sprintf(`
 		{
-			"itemID": 1,
+			"itemID": "%s",
 			"timeSpent": 1000
 		}
-	`)
+	`, item.PublicItemID))
 
 	var requestBody items.UpdateItemProgressReq
 	err := json.Unmarshal(requestJson, &requestBody)
@@ -362,7 +368,7 @@ func TestUpdateItemProgress(t *testing.T) {
 	w, c, router = RouterSetup(userID)
 
 	// Reading an item
-	c.Request = httptest.NewRequest(http.MethodGet, fmt.Sprintf("/api/item/%d", itemID), nil)
+	c.Request = httptest.NewRequest(http.MethodGet, fmt.Sprintf("/api/item/%s", publicItemID), nil)
 	router.ServeHTTP(w, c.Request)
 
 	var updatedItem models.Item

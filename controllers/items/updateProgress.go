@@ -10,8 +10,8 @@ import (
 )
 
 type UpdateItemProgressReq struct {
-	ItemID    uint64 `json:"itemID"`
-	TimeSpent uint   `json:"timeSpent"`
+	PublicItemID string `json:"itemID"`
+	TimeSpent    uint   `json:"timeSpent"`
 }
 
 func HandleUpdateItemProgress(c *gin.Context) {
@@ -27,7 +27,7 @@ func HandleUpdateItemProgress(c *gin.Context) {
 		return
 	}
 
-	err := m.UpdateProgress(userID, reqBody.ItemID, reqBody.TimeSpent)
+	err := m.UpdateProgress(userID, reqBody.PublicItemID, reqBody.TimeSpent)
 	if err != nil {
 		c.JSON(
 			http.StatusInternalServerError,

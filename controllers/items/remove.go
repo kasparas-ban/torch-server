@@ -3,7 +3,6 @@ package items
 import (
 	"errors"
 	"net/http"
-	"strconv"
 	a "torch/torch-server/auth"
 	m "torch/torch-server/models"
 
@@ -13,8 +12,8 @@ import (
 func HandleRemoveItem(c *gin.Context) {
 	userID := a.GetUserID(c)
 
-	itemID, err := strconv.ParseUint(c.Param("itemID"), 10, 64)
-	if err != nil {
+	publicItemID := c.Param("itemID")
+	if publicItemID == "" {
 		c.JSON(
 			http.StatusBadRequest,
 			gin.H{"error": errors.New("Invalid item ID")},
@@ -23,7 +22,7 @@ func HandleRemoveItem(c *gin.Context) {
 		return
 	}
 
-	err = m.RemoveItem(userID, itemID)
+	err := m.RemoveItem(userID, publicItemID)
 	if err != nil {
 		c.JSON(
 			http.StatusInternalServerError,

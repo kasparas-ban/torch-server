@@ -291,7 +291,8 @@ COLLATE = utf8mb4_unicode_ci
 
 --  Items table
 CREATE TABLE IF NOT EXISTS `items` (
-  `item_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `item_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `public_item_id` VARCHAR(12) NOT NULL,
   `user_id` BIGINT UNSIGNED NOT NULL,
   `title` VARCHAR(255) NOT NULL,
   `type` ENUM('DREAM', 'GOAL', 'TASK') NOT NULL,
@@ -303,21 +304,11 @@ CREATE TABLE IF NOT EXISTS `items` (
   `rec_period` ENUM('WEEK', 'DAY', 'MONTH'),
   `rec_progress` INT UNSIGNED,
   `rec_updated_at` TIMESTAMP DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-  `parent_id` BIGINT UNSIGNED,
+  `parent_id` VARCHAR(12),
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`item_id`),
+  UNIQUE KEY `idx_public_item_id` (`public_item_id`),
   INDEX `idx_user_id` (`user_id`)
-)
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8mb4
-COLLATE = utf8mb4_unicode_ci
-;
-
---  Relationship table
-CREATE TABLE IF NOT EXISTS `item_relations` (
-  `user_id` BIGINT UNSIGNED NOT NULL,
-  `parent_id` BIGINT UNSIGNED,
-  `child_id` BIGINT UNSIGNED,
-  PRIMARY KEY (`user_id`, `parent_id`, `child_id`)
 )
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb4
@@ -338,22 +329,6 @@ COLLATE = utf8mb4_unicode_ci
 ;
 
 -- Procedures
-
-DELIMITER //
-CREATE PROCEDURE DeleteItem(IN userID BIGINT UNSIGNED, IN itemID BIGINT UNSIGNED)
-BEGIN
-    START TRANSACTION;
-    
-    DELETE FROM items WHERE user_id = userID AND item_id = itemID;
-
-    DELETE FROM item_relations WHERE user_id = userID AND (parent_id = itemID OR child_id = itemID);
-
-    UPDATE items SET parent_id = NULL WHERE user_id = userID AND parent_id = itemID;
-
-    COMMIT;
-END;
-//
-DELIMITER ;
 
 DELIMITER //
 CREATE PROCEDURE AddUser(IN publicUserId VARCHAR(12), newClerkID VARCHAR(50), newUsername VARCHAR(30), newEmail VARCHAR(255), newBirthday DATE, newGender ENUM('MALE', 'FEMALE', 'OTHER'), newCountryID TINYINT UNSIGNED, newCity VARCHAR(255), newDescription VARCHAR(300))
@@ -396,8 +371,82 @@ BEGIN
 
     DELETE FROM users WHERE user_id = userID;
     DELETE FROM items WHERE user_id = userID;
-    DELETE FROM item_relations WHERE user_id = userID;
     DELETE FROM timer_history WHERE user_id = userID;
+
+    COMMIT;
+END;
+//
+DELIMITER ;
+
+-- ITEMS
+
+DELIMITER //
+CREATE PROCEDURE AddItem(IN `userID` BIGINT UNSIGNED, `newPublicItemID` VARCHAR(12), `newTitle` VARCHAR(255), `newType` ENUM('DREAM', 'GOAL', 'TASK'), `newTargetDate` DATE, `newPriority` ENUM('LOW', 'MEDIUM', 'HIGH'), `newDuration` INT UNSIGNED, `newRecTimes` INT UNSIGNED, `newRecProgress` INT UNSIGNED, `newRecPeriod` ENUM('WEEK', 'DAY', 'MONTH'), `newParentID` VARCHAR(12) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci)
+BEGIN
+    START TRANSACTION;
+
+    -- Add item into the items table
+		INSERT INTO `items` (`user_id`, `public_item_id`, `title`, `type`, `target_date`, `priority`, `duration`, `rec_times`, `rec_period`, `parent_id`) 
+    VALUES (`userID`, `newPublicItemID`, `newTitle`, `newType`, `newTargetDate`, `newPriority`, `newDuration`, `newRecTimes`, `newRecPeriod`, `newParentID`);
+
+    SET @last_id = LAST_INSERT_ID();
+
+    -- Select the updated item
+		SELECT `public_item_id`, `title`, `type`, `target_date`, `priority`, `duration`, `rec_times`, `rec_period`, `rec_progress`, `parent_id`, `time_spent`, `created_at`
+		FROM `items` 
+    WHERE `item_id` = @last_id;
+
+    COMMIT;
+END;
+//
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE UpdateItem(IN `userID` BIGINT UNSIGNED, `publicItemID` VARCHAR(12) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci, `newTitle` VARCHAR(255), `newTargetDate` DATE, `newPriority` ENUM('LOW', 'MEDIUM', 'HIGH'), `newDuration` INT UNSIGNED, `newRecTimes` INT UNSIGNED, `newRecProgress` INT UNSIGNED, `newRecPeriod` ENUM('WEEK', 'DAY', 'MONTH'), `newParentID` VARCHAR(12) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci)
+BEGIN
+    DECLARE `itemID` BIGINT UNSIGNED;
+
+    START TRANSACTION;
+
+		-- Select item ID
+    SELECT `item_id` INTO `itemID` FROM `items` WHERE `public_item_id` = `publicItemID`;
+
+		-- Update item in the items table
+    UPDATE `items`
+    SET
+      `title` = `newTitle`,
+      `target_date` = `newTargetDate`,
+      `priority` = `newPriority`,
+      `duration` = `newDuration`,
+      `rec_times` = `newRecTimes`,
+      `rec_progress` = `newRecProgress`,
+      `rec_period` = `newRecPeriod`,
+      `parent_id` = `newParentID`
+    WHERE
+      `user_id` = `userID` AND `item_id` = `itemID`;
+
+    -- Select the updated item
+		SELECT `public_item_id`, `title`, `type`, `target_date`, `priority`, `duration`, `rec_times`, `rec_period`, `rec_progress`, `parent_id`, `time_spent`, `created_at`
+		FROM `items` 
+    WHERE `item_id` = `itemID`;
+
+    COMMIT;
+END;
+//
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE DeleteItem(IN `userID` BIGINT UNSIGNED, `publicItemID` VARCHAR(12) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci)
+BEGIN
+    DECLARE `itemID` BIGINT UNSIGNED;
+
+    START TRANSACTION;
+
+    SELECT `item_id` INTO `itemID` FROM `items` WHERE `public_item_id` = `publicItemID`;
+    
+    DELETE FROM `items` WHERE `user_id` = `userID` AND `item_id` = `itemID`;
+
+    UPDATE `items` SET `parent_id` = NULL WHERE `user_id` = `userID` AND `parent_id` = `publicItemID`;
 
     COMMIT;
 END;
