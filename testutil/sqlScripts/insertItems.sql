@@ -14,10 +14,10 @@ INSERT INTO `items` (`user_id`, `public_item_id`, `title`, `type`, `parent_id`) 
 INSERT INTO `items` (`user_id`, `public_item_id`, `title`, `type`) VALUES (1, '13ax1usfu2uk', 'Read "Demons" by Dostoevsky', 'GOAL');
 INSERT INTO `items` (`user_id`, `public_item_id`, `title`, `type`) VALUES (1, '14ax1usfu2uk', 'Read "The Shape of Space"', 'GOAL');
 
-INSERT INTO `items` (`user_id`, `public_item_id`, `title`, `type`, `duration`, `target_date`, `priority`, `parent_id`) VALUES (1, '15ax1usfu2uk', 'Make a Figma design sketch', 'TASK', 100800, '2023-10-30', 'MEDIUM', '4bax1usfu2uk');
-INSERT INTO `items` (`user_id`, `public_item_id`, `title`, `type`, `duration`, `target_date`, `priority`, `parent_id`) VALUES (1, '16ax1usfu2uk', 'Code MVP frontend', 'TASK', 144000, '2023-10-30', 'HIGH', '4bax1usfu2uk');
-INSERT INTO `items` (`user_id`, `public_item_id`, `title`, `type`, `duration`, `target_date`, `priority`, `parent_id`) VALUES (1, '17ax1usfu2uk', 'Make MVP backend', 'TASK', 108000, '2023-10-30', 'HIGH', '4bax1usfu2uk');
-INSERT INTO `items` (`user_id`, `public_item_id`, `title`, `type`, `duration`, `parent_id`) VALUES (1, '18ax1usfu2uk', 'Learn common Spanish greeting phrases', 'TASK', 36000, '6bax1usfu2uk');
-INSERT INTO `items` (`user_id`, `public_item_id`, `title`, `type`, `duration`, `parent_id`) VALUES (1, '19ax1usfu2uk', 'Memorize a list of essential words', 'TASK', 36000, '6bax1usfu2uk');
-INSERT INTO `items` (`user_id`, `public_item_id`, `title`, `type`, `duration`, `parent_id`) VALUES (1, '20ax1usfu2uk', 'Learn Spanish pronunciation', 'TASK', 36000, '6bax1usfu2uk');
+INSERT INTO `items` (`user_id`, `public_item_id`, `title`, `type`, `duration`, `time_spent`, `target_date`, `priority`, `parent_id`) VALUES (1, '15ax1usfu2uk', 'Make a Figma design sketch', 'TASK', 100800, 90000, '2023-10-30', 'MEDIUM', '4bax1usfu2uk');
+INSERT INTO `items` (`user_id`, `public_item_id`, `title`, `type`, `duration`, `time_spent`, `target_date`, `priority`, `parent_id`) VALUES (1, '16ax1usfu2uk', 'Code MVP frontend', 'TASK', 144000, 85000, '2023-10-30', 'HIGH', '4bax1usfu2uk');
+INSERT INTO `items` (`user_id`, `public_item_id`, `title`, `type`, `duration`, `time_spent`, `target_date`, `priority`, `parent_id`) VALUES (1, '17ax1usfu2uk', 'Make MVP backend', 'TASK', 108000, 40000, '2023-10-30', 'HIGH', '4bax1usfu2uk');
+INSERT INTO `items` (`user_id`, `public_item_id`, `title`, `type`, `duration`, `time_spent`, `parent_id`) VALUES (1, '18ax1usfu2uk', 'Learn common Spanish greeting phrases', 'TASK', 36000, 8000, '6bax1usfu2uk');
+INSERT INTO `items` (`user_id`, `public_item_id`, `title`, `type`, `duration`, `time_spent`, `parent_id`) VALUES (1, '19ax1usfu2uk', 'Memorize a list of essential words', 'TASK', 36000, 1000, '6bax1usfu2uk');
+INSERT INTO `items` (`user_id`, `public_item_id`, `title`, `type`, `duration`, `time_spent`, `parent_id`) VALUES (1, '20ax1usfu2uk', 'Learn Spanish pronunciation', 'TASK', 36000, 30000, '6bax1usfu2uk');
 INSERT INTO `items` (`user_id`, `public_item_id`, `title`, `type`, `parent_id`, `rec_times`, `rec_period`, `rec_progress`) VALUES (1, '21ax1usfu2uk', 'Do weight lifting', 'TASK', '10ax1usfu2uk', 3, 'WEEK', 2);
