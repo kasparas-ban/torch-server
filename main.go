@@ -12,15 +12,14 @@ import (
 	"torch/torch-server/testutil"
 
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 )
 
 func main() {
 	//Load the .env file
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatal("error: failed to load the env file")
-	}
+	// err := godotenv.Load(".env")
+	// if err != nil {
+	// 	log.Fatal("error: failed to load the env file")
+	// }
 
 	port := os.Getenv("PORT")
 	prod := flag.Bool("prod", false, "Production environment")
