@@ -52,9 +52,8 @@ func RegisterRoutes(r *gin.Engine, useAuth bool) *gin.Engine {
 }
 
 func CORSMiddleware() gin.HandlerFunc {
-	domain := os.Getenv("FE_DOMAIN")
 	return func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", domain)
+		c.Writer.Header().Set("Access-Control-Allow-Origin", getOrigin(c))
 		c.Writer.Header().Set("Access-Control-Max-Age", "86400")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, UPDATE")
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "X-Requested-With, Content-Type, Origin, Authorization, Accept, Client-Security-Token, Accept-Encoding, x-access-token")
@@ -67,4 +66,20 @@ func CORSMiddleware() gin.HandlerFunc {
 			c.Next()
 		}
 	}
+}
+
+func getOrigin(c *gin.Context) string {
+	allowedOrigin := []string{os.Getenv("DEV_FE_DOMAIN"), os.Getenv("PROD_FE_DOMAIN")}
+
+	origin := c.GetHeader("Origin")
+	returnOrigin := allowedOrigin[0]
+
+	for _, element := range allowedOrigin {
+		if element == origin {
+			returnOrigin = origin
+			break
+		}
+	}
+
+	return returnOrigin
 }

@@ -24,6 +24,12 @@ Note that all images built this way will be cached and reused with each later la
 
 If you're using AWS RDS database, to enable SSL/TSL encryption between the database instance and the server you'll need to install a certificate bundle. Donwload the bundle from [here](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.SSL.html#UsingWithRDS.SSL.CertificatesAllRegions) and install it by following the instructions from [here](https://superuser.com/questions/437330/how-do-you-add-a-certificate-authority-ca-to-ubuntu).
 
+## Fly.io database connection
+
+To connect to the database forward the MySQL server port to your local machine using fly proxy:
+
+`flyctl proxy 3306 -a torch-database`
+
 ## TODOS
 
 - [x] Use nanoid's for userID's

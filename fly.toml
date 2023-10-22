@@ -1,4 +1,4 @@
-# fly.toml app configuration file generated for torch-server on 2023-09-04T16:22:21+03:00
+# fly.toml app configuration file generated for torch-server on 2023-10-22T10:38:01+03:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
@@ -6,10 +6,27 @@
 app = "torch-server"
 primary_region = "waw"
 
-[build]
+[[services]]
+  internal_port = 3003
+  protocol = "tcp"
+
+[services.concurrency]
+  hard_limit = 25
+  soft_limit = 20
+
+[[services.ports]]
+  handlers = ["http"]
+  port = "80"
+
+[[services.ports]]
+  handlers = ["tls", "http"]
+  port = "443"
+
+[[services.tcp_checks]]
+  interval = 10000
+  timeout = 2000
 
 [http_service]
-  internal_port = 3001
   force_https = true
   auto_stop_machines = true
   auto_start_machines = true
