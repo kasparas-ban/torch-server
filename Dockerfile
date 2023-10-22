@@ -22,7 +22,6 @@
 FROM golang:latest as build
 WORKDIR /server
 COPY . /server
-RUN export GOPROXY=https://goproxy.io,direct
 RUN export GOPROXY=https://goproxy.io,direct && go build -o ./torch-server
 EXPOSE 3003
 ENTRYPOINT ["./torch-server", "-prod"]
