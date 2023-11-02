@@ -1,7 +1,6 @@
 package items
 
 import (
-	"errors"
 	"net/http"
 	a "torch/torch-server/auth"
 	m "torch/torch-server/models"
@@ -21,7 +20,7 @@ func HandleUpdateItemProgress(c *gin.Context) {
 	if err := c.BindJSON(&reqBody); err != nil {
 		c.JSON(
 			http.StatusBadRequest,
-			gin.H{"error": errors.New("Invalid request payload")},
+			gin.H{"error": "Invalid request payload"},
 		)
 		c.Abort()
 		return

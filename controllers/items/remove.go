@@ -1,7 +1,6 @@
 package items
 
 import (
-	"errors"
 	"net/http"
 	a "torch/torch-server/auth"
 	m "torch/torch-server/models"
@@ -16,7 +15,7 @@ func HandleRemoveItem(c *gin.Context) {
 	if publicItemID == "" {
 		c.JSON(
 			http.StatusBadRequest,
-			gin.H{"error": errors.New("Invalid item ID")},
+			gin.H{"error": "Invalid item ID"},
 		)
 		c.Abort()
 		return

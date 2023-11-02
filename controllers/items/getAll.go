@@ -39,7 +39,7 @@ func HandleGetItem(c *gin.Context) {
 	if publicItemID == "" {
 		c.JSON(
 			http.StatusBadRequest,
-			gin.H{"error": errors.New("Invalid item ID")},
+			gin.H{"error": "Invalid item ID"},
 		)
 		c.Abort()
 		return

@@ -15,6 +15,7 @@ func HandleUpdateUser(c *gin.Context) {
 			gin.H{"error": "Invalid user object"},
 		)
 		c.Abort()
+		return
 	}
 	userReq.UserID = c.GetUint64("userID")
 

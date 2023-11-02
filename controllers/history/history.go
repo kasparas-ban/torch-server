@@ -1,7 +1,6 @@
 package history
 
 import (
-	"errors"
 	"net/http"
 	a "torch/torch-server/auth"
 	m "torch/torch-server/models"
@@ -40,7 +39,7 @@ func HandleUpsertTimerHistory(c *gin.Context) {
 	if err := c.BindJSON(&timerData); err != nil {
 		c.JSON(
 			http.StatusBadRequest,
-			gin.H{"error": errors.New("Invalid timer object")},
+			gin.H{"error": "Invalid timer object"},
 		)
 		c.Abort()
 		return

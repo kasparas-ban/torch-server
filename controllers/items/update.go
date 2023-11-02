@@ -1,7 +1,6 @@
 package items
 
 import (
-	"errors"
 	"net/http"
 	a "torch/torch-server/auth"
 	m "torch/torch-server/models"
@@ -23,7 +22,7 @@ func HandleUpdateItem(c *gin.Context) {
 	default:
 		c.JSON(
 			http.StatusBadRequest,
-			gin.H{"error": errors.New("Invalid item type")},
+			gin.H{"error": "Invalid item type"},
 		)
 		c.Abort()
 		return
@@ -36,9 +35,10 @@ func UpdateExistingItem[T m.ExistingItem](c *gin.Context, userID uint64) {
 	if err := c.BindJSON(&item); err != nil {
 		c.JSON(
 			http.StatusBadRequest,
-			gin.H{"error": errors.New("Invalid item object")},
+			gin.H{"error": "Invalid item object"},
 		)
 		c.Abort()
+		return
 	}
 
 	updatedItem, err := item.UpdateItem(userID)

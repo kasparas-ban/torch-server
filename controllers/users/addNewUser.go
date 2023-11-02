@@ -10,21 +10,23 @@ import (
 
 func HandleAddNewUser(c *gin.Context) {
 	clerkID := c.GetString("clerkID")
-	if clerkID != "" {
+	if clerkID == "" {
 		c.JSON(
 			http.StatusBadRequest,
-			gin.H{"error": errors.New("Could not find clerkID")},
+			gin.H{"error": "Could not find clerkID"},
 		)
 		c.Abort()
+		return
 	}
 
 	var userReq m.NewUser
 	if err := c.BindJSON(&userReq); err != nil {
 		c.JSON(
 			http.StatusBadRequest,
-			gin.H{"error": errors.New("Invalid user object")},
+			gin.H{"error": "Invalid user object"},
 		)
 		c.Abort()
+		return
 	}
 
 	user, err := m.AddUser(clerkID, userReq)

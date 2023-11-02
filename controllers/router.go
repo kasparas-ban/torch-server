@@ -69,7 +69,7 @@ func CORSMiddleware() gin.HandlerFunc {
 }
 
 func getOrigin(c *gin.Context) string {
-	allowedOrigin := []string{os.Getenv("DEV_FE_DOMAIN"), os.Getenv("PROD_FE_DOMAIN")}
+	allowedOrigin := []string{os.Getenv("LOCAL_FE_DOMAIN"), os.Getenv("DEV_FE_DOMAIN"), os.Getenv("PROD_FE_DOMAIN")}
 
 	origin := c.GetHeader("Origin")
 	returnOrigin := allowedOrigin[0]

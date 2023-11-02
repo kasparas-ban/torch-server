@@ -1,7 +1,6 @@
 package items
 
 import (
-	"errors"
 	"net/http"
 	a "torch/torch-server/auth"
 	m "torch/torch-server/models"
@@ -24,7 +23,7 @@ func HandleAddItem(c *gin.Context) {
 	default:
 		c.JSON(
 			http.StatusBadRequest,
-			gin.H{"error": errors.New("Invalid item type")},
+			gin.H{"error": "Invalid item type"},
 		)
 		c.Abort()
 		return
@@ -36,16 +35,17 @@ func SaveItem[T m.GeneralItem](c *gin.Context, userID uint64) {
 	if err := c.BindJSON(&newItem); err != nil {
 		c.JSON(
 			http.StatusBadRequest,
-			gin.H{"error": errors.New("Invalid item object")},
+			gin.H{"error": "Invalid item object"},
 		)
 		c.Abort()
+		return
 	}
 
 	publicItemID, err := util.New()
 	if err != nil {
 		c.JSON(
 			http.StatusInternalServerError,
-			gin.H{"error": errors.New("Failed to save the item")},
+			gin.H{"error": "Failed to save the item"},
 		)
 		c.Abort()
 		return

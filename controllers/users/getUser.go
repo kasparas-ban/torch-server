@@ -15,6 +15,7 @@ func HandleGetUserInfo(c *gin.Context) {
 			gin.H{"error": "Could not find userID"},
 		)
 		c.Abort()
+		return
 	}
 
 	user, err := models.GetUserInfo(userID)
@@ -38,6 +39,7 @@ func GetUserInfoByClerkID(c *gin.Context) {
 			gin.H{"error": "Could not find clerkID"},
 		)
 		c.Abort()
+		return
 	}
 
 	user, err := models.GetUserByClerkID(clerkID)

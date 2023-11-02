@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -51,7 +50,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		if err != nil {
 			c.JSON(
 				http.StatusBadRequest,
-				gin.H{"error": errors.New("Could not get user info")},
+				gin.H{"error": "Could not get user info"},
 			)
 			c.Abort()
 			return
@@ -69,7 +68,7 @@ func AuthMiddleware() gin.HandlerFunc {
 			if err != nil {
 				c.JSON(
 					http.StatusInternalServerError,
-					gin.H{"error": errors.New("Unexpected error occured")},
+					gin.H{"error": "Unexpected error occured"},
 				)
 				c.Abort()
 			}
@@ -88,7 +87,7 @@ func GetClerkID(c *gin.Context) string {
 	if clerkID != "" {
 		c.JSON(
 			http.StatusBadRequest,
-			gin.H{"error": errors.New("Could not find clerkID")},
+			gin.H{"error": "Could not find clerkID"},
 		)
 		c.Abort()
 	}
