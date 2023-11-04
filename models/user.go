@@ -1,6 +1,8 @@
 package models
 
 import (
+	"errors"
+	"fmt"
 	"torch/torch-server/db"
 	o "torch/torch-server/optional"
 	"torch/torch-server/util"
@@ -16,8 +18,8 @@ type User struct {
 	Email        string       `json:"email"`
 	Birthday     o.NullString `json:"birthday"`
 	Gender       o.NullString `json:"gender"`
-	City         o.NullString `json:"city"`
-	Description  o.NullString `json:"description"`
+	City         o.NullString `json:"city,omitempty"`
+	Description  o.NullString `json:"description,omitempty"`
 	UpdatedAt    string       `json:"-"`
 	CreatedAt    string       `json:"createdAt"`
 }
@@ -35,8 +37,23 @@ type NewUser struct {
 	Gender       o.NullString `json:"gender"`
 	City         o.NullString `json:"city"`
 	Description  o.NullString `json:"description"`
+	CountryCode  o.NullString `json:"countryCode" validate:"lt=3"`
+}
 
-	CountryCode o.NullString `json:"countryCode"`
+func (u *NewUser) Validate() error {
+	if err := Validate.Struct(u); err != nil {
+		return err
+	}
+
+	if u.Gender.IsValid && (u.Gender.Val != "MALE" && u.Gender.Val != "FEMALE" && u.Gender.Val != "OTHER") {
+		return errors.New("incorrect gender value")
+	}
+
+	if u.CountryCode.IsValid && (len(u.CountryCode.Val) > 2) {
+		return errors.New("incorrect country code value")
+	}
+
+	return nil
 }
 
 func GetUserInfo(userID uint64) (ExistingUser, error) {
@@ -74,16 +91,18 @@ func AddUser(clerkID string, u NewUser) (ExistingUser, error) {
 		if u.CountryCode.IsValid && u.CountryCode.Val != "" {
 			err := tx.Raw(`
 				SELECT country_id FROM countries WHERE country_code = ?
-			`, u.CountryCode.Val).Scan(countryId).Error
+			`, u.CountryCode.Val).Scan(&countryId).Error
 			if err != nil {
 				return err
 			}
 		}
 
+		fmt.Printf("\n\n inserting user: %v %v %v \n\n", u, clerkID, countryId)
+
 		// Add user
-		err = tx.Raw(`
+		err = tx.Exec(`
 			INSERT INTO users (public_user_id, clerk_id, username, email, birthday, gender, country_id, city, description) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-		`, publicUserID, clerkID, u.Username, u.Email, u.Birthday, u.Gender, countryId, u.City, u.Description, u.UserID).Error
+		`, publicUserID, clerkID, u.Username, u.Email, u.Birthday, u.Gender, countryId, u.City, u.Description).Error
 		if err != nil {
 			return err
 		}
@@ -105,11 +124,11 @@ func AddUser(clerkID string, u NewUser) (ExistingUser, error) {
 	return newUser, err
 }
 
-func UpdateUser(user NewUser) (ExistingUser, error) {
+func UpdateUser(userID uint64, user NewUser) (ExistingUser, error) {
 	var updatedUser ExistingUser
 	err := db.GetDB().Raw(`
 		CALL UpdateUser(?, ?, ?, ?, ?, ?, ?, ?)
-	`, user.UserID, user.Username, user.Email, user.Birthday, user.Gender, user.CountryCode, user.City, user.Description).Scan(&updatedUser).Error
+	`, userID, user.Username, user.Email, user.Birthday, user.Gender, user.CountryCode, user.City, user.Description).Scan(&updatedUser).Error
 
 	return updatedUser, err
 }

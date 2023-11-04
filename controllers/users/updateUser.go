@@ -17,9 +17,9 @@ func HandleUpdateUser(c *gin.Context) {
 		c.Abort()
 		return
 	}
-	userReq.UserID = c.GetUint64("userID")
+	userID := c.GetUint64("userID")
 
-	updatedUser, err := m.UpdateUser(userReq)
+	updatedUser, err := m.UpdateUser(userID, userReq)
 	if err != nil {
 		c.JSON(
 			http.StatusInternalServerError,

@@ -5,6 +5,7 @@ import (
 	"torch/torch-server/controllers/history"
 	"torch/torch-server/controllers/items"
 	"torch/torch-server/controllers/users"
+	"torch/torch-server/models"
 
 	"github.com/gin-gonic/gin"
 )
@@ -19,6 +20,8 @@ func SetupRouter(logging, useAuth bool) *gin.Engine {
 	}
 
 	RegisterRoutes(Router, useAuth)
+
+	models.InitializeValidators()
 
 	return Router
 }
