@@ -4,6 +4,8 @@ import (
 	"torch/torch-server/db"
 	o "torch/torch-server/optional"
 	"torch/torch-server/util"
+
+	"gorm.io/gorm"
 )
 
 type User struct {
@@ -26,8 +28,15 @@ type ExistingUser struct {
 }
 
 type NewUser struct {
-	User
-	CountryID o.NullUint8 `json:"countryID"`
+	PublicUserID string       `json:"userID" validate:"required"`
+	Username     string       `json:"username" validate:"required"`
+	Email        string       `json:"email" validate:"required,email"`
+	Birthday     o.NullString `json:"birthday"`
+	Gender       o.NullString `json:"gender"`
+	City         o.NullString `json:"city"`
+	Description  o.NullString `json:"description"`
+
+	CountryCode o.NullString `json:"countryCode"`
 }
 
 func GetUserInfo(userID uint64) (ExistingUser, error) {
@@ -59,9 +68,39 @@ func AddUser(clerkID string, u NewUser) (ExistingUser, error) {
 		return newUser, err
 	}
 
-	err = db.GetDB().Raw(`
-		CALL AddUser(?, ?, ?, ?, ?, ?, ?, ?, ?)
-	`, publicUserID, clerkID, u.Username, u.Email, u.Birthday, u.Gender, u.CountryID, u.City, u.Description).Scan(&newUser).Error
+	db.GetDB().Transaction(func(tx *gorm.DB) error {
+		// Get country ID
+		var countryId o.NullUint
+		if u.CountryCode.IsValid && u.CountryCode.Val != "" {
+			err := tx.Raw(`
+				SELECT country_id FROM countries WHERE country_code = ?
+			`, u.CountryCode.Val).Scan(countryId).Error
+			if err != nil {
+				return err
+			}
+		}
+
+		// Add user
+		err = tx.Raw(`
+			INSERT INTO users (public_user_id, clerk_id, username, email, birthday, gender, country_id, city, description) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+		`, publicUserID, clerkID, u.Username, u.Email, u.Birthday, u.Gender, countryId, u.City, u.Description, u.UserID).Error
+		if err != nil {
+			return err
+		}
+
+		// Select new user
+		err = tx.Raw(`
+			SELECT u.public_user_id, u.clerk_id, u.username, u.email, u.birthday, u.gender, c.country, u.city, u.description, u.created_at 
+			FROM users u
+			LEFT JOIN countries c ON u.country_id = c.country_id
+			WHERE u.user_id = LAST_INSERT_ID() LIMIT 1;
+		`).Scan(&newUser).Error
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
 
 	return newUser, err
 }
@@ -70,7 +109,7 @@ func UpdateUser(user NewUser) (ExistingUser, error) {
 	var updatedUser ExistingUser
 	err := db.GetDB().Raw(`
 		CALL UpdateUser(?, ?, ?, ?, ?, ?, ?, ?)
-	`, user.UserID, user.Username, user.Email, user.Birthday, user.Gender, user.CountryID, user.City, user.Description).Scan(&updatedUser).Error
+	`, user.UserID, user.Username, user.Email, user.Birthday, user.Gender, user.CountryCode, user.City, user.Description).Scan(&updatedUser).Error
 
 	return updatedUser, err
 }

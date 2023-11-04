@@ -331,11 +331,16 @@ COLLATE = utf8mb4_unicode_ci
 -- Procedures
 
 DELIMITER //
-CREATE PROCEDURE AddUser(IN publicUserId VARCHAR(12), newClerkID VARCHAR(50), newUsername VARCHAR(30), newEmail VARCHAR(255), newBirthday DATE, newGender ENUM('MALE', 'FEMALE', 'OTHER'), newCountryID TINYINT UNSIGNED, newCity VARCHAR(255), newDescription VARCHAR(300))
+CREATE PROCEDURE AddUser(IN `publicUserId` VARCHAR(12) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci, `newClerkID` VARCHAR(50), `newUsername` VARCHAR(30), `newEmail` VARCHAR(255), `newBirthday` DATE, `newGender` ENUM('MALE', 'FEMALE', 'OTHER'), `newCountryCode` CHAR(2) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci, `newCity` VARCHAR(255), `newDescription` VARCHAR(300))
 BEGIN
+    DECLARE `countryID` TINYINT UNSIGNED;
+
     START TRANSACTION;
+
+    -- Select country ID
+    SELECT `country_id` INTO `countryID` FROM `countries` WHERE `country_code` = `newCountryCode`;
     
-    INSERT INTO users (public_user_id, clerk_id, username, email, birthday, gender, country_id, city, `description`) VALUES (publicUserId, newClerkID, newUsername, newEmail, newBirthday, newGender, newCountryID, newCity, newDescription);
+    INSERT INTO `users` (`public_user_id`, `clerk_id`, `username`, `email`, `birthday`, `gender`, `country_id`, `city`, `description`) VALUES (`publicUserId`, `newClerkID`, `newUsername`, `newEmail`, `newBirthday`, `newGender`, `countryID`, `newCity`, `newDescription`);
 
     SELECT u.public_user_id, u.clerk_id, u.username, u.email, u.birthday, u.gender, c.country, u.city, u.description, u.created_at 
 		FROM users u
@@ -348,11 +353,16 @@ END;
 DELIMITER ;
 
 DELIMITER //
-CREATE PROCEDURE UpdateUser(IN userID BIGINT UNSIGNED, newUsername VARCHAR(30), newEmail VARCHAR(255), newBirthday DATE, newGender ENUM('MALE', 'FEMALE', 'OTHER'), newCountryID TINYINT UNSIGNED, newCity VARCHAR(255), newDescription VARCHAR(300))
+CREATE PROCEDURE UpdateUser(IN `userID` BIGINT UNSIGNED, `newUsername` VARCHAR(30), `newEmail` VARCHAR(255), `newBirthday` DATE, `newGender` ENUM('MALE', 'FEMALE', 'OTHER'), `newCountryCode` CHAR(2), `newCity` VARCHAR(255), `newDescription` VARCHAR(300))
 BEGIN
+    DECLARE `countryID` TINYINT UNSIGNED;
+
     START TRANSACTION;
 
-    UPDATE users SET username = newUsername, email = newEmail, birthday = newBirthday, gender = newGender, country_id = newCountryID, city = newCity, `description` = newDescription WHERE user_id = userID;
+    -- Select country ID
+    SELECT `country_id` INTO `countryID` FROM `countries` WHERE `country_code` = `newCountryCode`;
+
+    UPDATE `users` SET `username` = `newUsername`, `email` = `newEmail`, `birthday` = `newBirthday`, `gender` = `newGender`, `country_id` = `countryID`, `city` = `newCity`, `description` = `newDescription` WHERE `user_id` = `userID`;
 
     SELECT u.public_user_id, u.clerk_id, u.username, u.email, u.birthday, u.gender, c.country, u.city, u.description, u.created_at 
 		FROM users u

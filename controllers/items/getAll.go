@@ -1,7 +1,6 @@
 package items
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 
@@ -11,7 +10,8 @@ import (
 )
 
 func HandleGetAllItems(c *gin.Context) {
-	userID := c.GetUint64("userID")
+	userID := uint64(1)
+	// userID := c.GetUint64("userID")
 	if userID == 0 {
 		c.JSON(
 			http.StatusBadRequest,
