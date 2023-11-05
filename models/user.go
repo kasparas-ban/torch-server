@@ -29,14 +29,13 @@ type ExistingUser struct {
 }
 
 type NewUser struct {
-	PublicUserID string       `json:"userID" validate:"required"`
-	Username     string       `json:"username" validate:"required,gt=5,lt=21"`
-	Email        string       `json:"email" validate:"required,email"`
-	Birthday     o.NullString `json:"birthday"`
-	Gender       o.NullString `json:"gender"`
-	City         o.NullString `json:"city"`
-	Description  o.NullString `json:"description"`
-	CountryCode  o.NullString `json:"countryCode" validate:"lt=3"`
+	Username    string       `json:"username" validate:"required,gt=5,lt=21"`
+	Email       string       `json:"email" validate:"required,email"`
+	Birthday    o.NullString `json:"birthday"`
+	Gender      o.NullString `json:"gender"`
+	City        o.NullString `json:"city"`
+	Description o.NullString `json:"description"`
+	CountryCode o.NullString `json:"countryCode" validate:"lt=3"`
 }
 
 type UpdateUserReq struct {

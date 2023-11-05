@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"os"
+	"torch/torch-server/auth"
 	"torch/torch-server/controllers/history"
 	"torch/torch-server/controllers/items"
 	"torch/torch-server/controllers/users"
@@ -30,7 +31,7 @@ func SetupRouter(logging, useAuth bool) *gin.Engine {
 func RegisterRoutes(r *gin.Engine, useAuth bool) *gin.Engine {
 	r.Use(CORSMiddleware())
 	if useAuth {
-		// r.Use(auth.AuthMiddleware())
+		r.Use(auth.AuthMiddleware())
 	}
 
 	api := r.Group("/api")

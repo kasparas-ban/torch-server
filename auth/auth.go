@@ -61,17 +61,19 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		// Read userID
 		userIDString := user.PrivateMetadata.(map[string]interface{})[userID_metadata]
-		userID, err := strconv.ParseUint(userIDString.(string), 10, 64)
-		if err == nil {
-			c.Set(userID_context, userID)
-		} else {
-			err := addUserID(c, user)
-			if err != nil {
-				c.JSON(
-					http.StatusInternalServerError,
-					gin.H{"error": "Unexpected error occured"},
-				)
-				c.Abort()
+		if userIDString != nil {
+			userID, err := strconv.ParseUint(userIDString.(string), 10, 64)
+			if err == nil {
+				c.Set(userID_context, userID)
+			} else {
+				err := addUserID(c, user)
+				if err != nil {
+					c.JSON(
+						http.StatusInternalServerError,
+						gin.H{"error": "Unexpected error occured"},
+					)
+					c.Abort()
+				}
 			}
 		}
 

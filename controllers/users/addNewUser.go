@@ -2,12 +2,22 @@ package users
 
 import (
 	"net/http"
+	a "torch/torch-server/auth"
 	m "torch/torch-server/models"
 
 	"github.com/gin-gonic/gin"
 )
 
 func HandleAddNewUser(c *gin.Context) {
+	userID, err := a.GetUserID(c)
+	if userID == 0 || err != nil {
+		c.AbortWithStatusJSON(
+			http.StatusNotModified,
+			nil,
+		)
+		return
+	}
+
 	clerkID := c.GetString("clerkID")
 	if clerkID == "" {
 		c.AbortWithStatusJSON(
