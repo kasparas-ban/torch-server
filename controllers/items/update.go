@@ -9,7 +9,15 @@ import (
 )
 
 func HandleUpdateItem(c *gin.Context) {
-	userID := a.GetUserID(c)
+	userID, err := a.GetUserID(c)
+	if err != nil {
+		c.AbortWithStatusJSON(
+			http.StatusInternalServerError,
+			gin.H{"error": err.Error()},
+		)
+		return
+	}
+
 	itemType := c.Param("type")
 
 	switch itemType {

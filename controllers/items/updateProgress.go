@@ -14,7 +14,14 @@ type UpdateItemProgressReq struct {
 }
 
 func HandleUpdateItemProgress(c *gin.Context) {
-	userID := a.GetUserID(c)
+	userID, err := a.GetUserID(c)
+	if err != nil {
+		c.AbortWithStatusJSON(
+			http.StatusInternalServerError,
+			gin.H{"error": err.Error()},
+		)
+		return
+	}
 
 	var reqBody UpdateItemProgressReq
 	if err := c.BindJSON(&reqBody); err != nil {
@@ -26,7 +33,7 @@ func HandleUpdateItemProgress(c *gin.Context) {
 		return
 	}
 
-	err := m.UpdateProgress(userID, reqBody.PublicItemID, reqBody.TimeSpent)
+	err = m.UpdateProgress(userID, reqBody.PublicItemID, reqBody.TimeSpent)
 	if err != nil {
 		c.JSON(
 			http.StatusInternalServerError,

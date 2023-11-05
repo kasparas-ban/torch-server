@@ -9,7 +9,14 @@ import (
 )
 
 func HandleRemoveItem(c *gin.Context) {
-	userID := a.GetUserID(c)
+	userID, err := a.GetUserID(c)
+	if err != nil {
+		c.AbortWithStatusJSON(
+			http.StatusInternalServerError,
+			gin.H{"error": err.Error()},
+		)
+		return
+	}
 
 	publicItemID := c.Param("itemID")
 	if publicItemID == "" {
@@ -21,7 +28,7 @@ func HandleRemoveItem(c *gin.Context) {
 		return
 	}
 
-	err := m.RemoveItem(userID, publicItemID)
+	err = m.RemoveItem(userID, publicItemID)
 	if err != nil {
 		c.JSON(
 			http.StatusInternalServerError,

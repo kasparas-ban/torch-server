@@ -9,15 +9,21 @@ import (
 )
 
 func HandleDeleteUser(c *gin.Context) {
-	userID := a.GetUserID(c)
-
-	err := m.DeleteUser(userID)
+	userID, err := a.GetUserID(c)
 	if err != nil {
-		c.JSON(
+		c.AbortWithStatusJSON(
 			http.StatusInternalServerError,
 			gin.H{"error": err.Error()},
 		)
-		c.Abort()
+		return
+	}
+
+	err = m.DeleteUser(userID)
+	if err != nil {
+		c.AbortWithStatusJSON(
+			http.StatusInternalServerError,
+			gin.H{"error": "Failed to delete user"},
+		)
 		return
 	}
 

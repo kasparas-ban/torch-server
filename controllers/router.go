@@ -22,6 +22,7 @@ func SetupRouter(logging, useAuth bool) *gin.Engine {
 	RegisterRoutes(Router, useAuth)
 
 	models.InitializeValidators()
+	gin.EnableJsonDecoderDisallowUnknownFields()
 
 	return Router
 }

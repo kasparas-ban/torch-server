@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -94,17 +95,12 @@ func GetClerkID(c *gin.Context) string {
 	return clerkID
 }
 
-func GetUserID(c *gin.Context) uint64 {
+func GetUserID(c *gin.Context) (uint64, error) {
 	userID := c.GetUint64(userID_context)
 	if userID == 0 {
-		c.JSON(
-			http.StatusBadRequest,
-			gin.H{"error": "Could not find userID"},
-		)
-		c.Abort()
-		return 0
+		return 0, errors.New("Failed to get user ID")
 	}
-	return userID
+	return userID, nil
 }
 
 func addUserID(c *gin.Context, user *clerk.User) error {

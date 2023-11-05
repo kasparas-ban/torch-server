@@ -2,7 +2,6 @@ package models
 
 import (
 	"errors"
-	"fmt"
 	"torch/torch-server/db"
 	o "torch/torch-server/optional"
 	"torch/torch-server/util"
@@ -31,7 +30,7 @@ type ExistingUser struct {
 
 type NewUser struct {
 	PublicUserID string       `json:"userID" validate:"required"`
-	Username     string       `json:"username" validate:"required"`
+	Username     string       `json:"username" validate:"required,gt=5,lt=21"`
 	Email        string       `json:"email" validate:"required,email"`
 	Birthday     o.NullString `json:"birthday"`
 	Gender       o.NullString `json:"gender"`
@@ -40,7 +39,33 @@ type NewUser struct {
 	CountryCode  o.NullString `json:"countryCode" validate:"lt=3"`
 }
 
+type UpdateUserReq struct {
+	PublicUserID string       `json:"userID" validate:"required"`
+	Username     string       `json:"username" validate:"required,gt=5,lt=21"`
+	Birthday     o.NullString `json:"birthday"`
+	Gender       o.NullString `json:"gender"`
+	City         o.NullString `json:"city"`
+	Description  o.NullString `json:"description"`
+	CountryCode  o.NullString `json:"countryCode" validate:"lt=3"`
+}
+
 func (u *NewUser) Validate() error {
+	if err := Validate.Struct(u); err != nil {
+		return err
+	}
+
+	if u.Gender.IsValid && (u.Gender.Val != "MALE" && u.Gender.Val != "FEMALE" && u.Gender.Val != "OTHER") {
+		return errors.New("incorrect gender value")
+	}
+
+	if u.CountryCode.IsValid && (len(u.CountryCode.Val) > 2) {
+		return errors.New("incorrect country code value")
+	}
+
+	return nil
+}
+
+func (u *UpdateUserReq) Validate() error {
 	if err := Validate.Struct(u); err != nil {
 		return err
 	}
@@ -85,7 +110,7 @@ func AddUser(clerkID string, u NewUser) (ExistingUser, error) {
 		return newUser, err
 	}
 
-	db.GetDB().Transaction(func(tx *gorm.DB) error {
+	err = db.GetDB().Transaction(func(tx *gorm.DB) error {
 		// Get country ID
 		var countryId o.NullUint
 		if u.CountryCode.IsValid && u.CountryCode.Val != "" {
@@ -96,8 +121,6 @@ func AddUser(clerkID string, u NewUser) (ExistingUser, error) {
 				return err
 			}
 		}
-
-		fmt.Printf("\n\n inserting user: %v %v %v \n\n", u, clerkID, countryId)
 
 		// Add user
 		err = tx.Exec(`
@@ -124,19 +147,76 @@ func AddUser(clerkID string, u NewUser) (ExistingUser, error) {
 	return newUser, err
 }
 
-func UpdateUser(userID uint64, user NewUser) (ExistingUser, error) {
+func UpdateUser(userID uint64, u UpdateUserReq) (ExistingUser, error) {
 	var updatedUser ExistingUser
-	err := db.GetDB().Raw(`
-		CALL UpdateUser(?, ?, ?, ?, ?, ?, ?, ?)
-	`, userID, user.Username, user.Email, user.Birthday, user.Gender, user.CountryCode, user.City, user.Description).Scan(&updatedUser).Error
+
+	err := db.GetDB().Transaction(func(tx *gorm.DB) error {
+		// Get country ID
+		var countryId o.NullUint
+		if u.CountryCode.IsValid && u.CountryCode.Val != "" {
+			err := tx.Raw(`
+				SELECT country_id FROM countries WHERE country_code = ?
+			`, u.CountryCode.Val).Scan(&countryId).Error
+			if err != nil {
+				return err
+			}
+		}
+
+		// Update user
+		err := tx.Exec(`
+			UPDATE users 
+			SET username = ?, birthday = ?, gender = ?, country_id = ?, city = ?, description = ? 
+			WHERE user_id = ?
+		`, u.Username, u.Birthday, u.Gender, countryId, u.City, u.Description, userID).Error
+		if err != nil {
+			return err
+		}
+
+		// Select updated user
+		err = tx.Raw(`
+			SELECT u.public_user_id, u.clerk_id, u.username, u.email, u.birthday, u.gender, c.country, u.city, u.description, u.created_at 
+			FROM users u
+			LEFT JOIN countries c ON u.country_id = c.country_id
+			WHERE u.user_id = ? LIMIT 1;
+		`, userID).Scan(&updatedUser).Error
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
 
 	return updatedUser, err
 }
 
 func DeleteUser(userID uint64) error {
-	err := db.GetDB().Exec(`
-		CALL DeleteUser(?)
-	`, userID).Error
+	err := db.GetDB().Transaction(func(tx *gorm.DB) error {
+		// Delete user
+		err := tx.Exec(`
+			DELETE FROM users WHERE user_id = ?
+		`, userID).Error
+		if err != nil {
+			return err
+		}
+
+		// Delete all items
+		err = tx.Exec(`
+			DELETE FROM items WHERE user_id = ?
+		`, userID).Error
+		if err != nil {
+			return err
+		}
+
+		// Delete timer history records
+		err = tx.Exec(`
+			DELETE FROM timer_history WHERE user_id = ?
+		`, userID).Error
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
 
 	return err
 }

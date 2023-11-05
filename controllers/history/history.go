@@ -33,7 +33,14 @@ func HandleGetTimerHistory(c *gin.Context) {
 }
 
 func HandleUpsertTimerHistory(c *gin.Context) {
-	userID := a.GetUserID(c)
+	userID, err := a.GetUserID(c)
+	if err != nil {
+		c.AbortWithStatusJSON(
+			http.StatusInternalServerError,
+			gin.H{"error": err.Error()},
+		)
+		return
+	}
 
 	var timerData m.UpsertReq
 	if err := c.BindJSON(&timerData); err != nil {
@@ -45,7 +52,7 @@ func HandleUpsertTimerHistory(c *gin.Context) {
 		return
 	}
 
-	err := m.UpsertTimerHistory(timerData, userID)
+	err = m.UpsertTimerHistory(timerData, userID)
 	if err != nil {
 		c.JSON(
 			http.StatusInternalServerError,
