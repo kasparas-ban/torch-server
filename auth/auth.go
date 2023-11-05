@@ -34,7 +34,7 @@ func Init() {
 	}
 }
 
-func AuthMiddleware() gin.HandlerFunc {
+func AuthMiddleware(isNewUser bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Verify session token
 		sessionToken := c.GetHeader("Authorization")
@@ -59,13 +59,11 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		c.Set("clerkID", user.ID)
 
-		// Read userID
-		userIDString := user.PrivateMetadata.(map[string]interface{})[userID_metadata]
-		if userIDString != nil {
-			userID, err := strconv.ParseUint(userIDString.(string), 10, 64)
-			if err == nil {
-				c.Set(userID_context, userID)
-			} else {
+		if !isNewUser {
+			// Read userID
+			userIDString := user.PrivateMetadata.(map[string]interface{})[userID_metadata]
+			if userIDString == nil {
+				fmt.Printf("\n\n METADATA NULL \n\n")
 				err := addUserID(c, user)
 				if err != nil {
 					c.JSON(
@@ -73,6 +71,21 @@ func AuthMiddleware() gin.HandlerFunc {
 						gin.H{"error": "Unexpected error occured"},
 					)
 					c.Abort()
+				}
+			} else {
+				userID, err := strconv.ParseUint(userIDString.(string), 10, 64)
+				fmt.Printf("\n\n METADATA EXISTS %v \n\n", userID)
+				if err == nil {
+					c.Set(userID_context, userID)
+				} else {
+					err := addUserID(c, user)
+					if err != nil {
+						c.JSON(
+							http.StatusInternalServerError,
+							gin.H{"error": "Unexpected error occured"},
+						)
+						c.Abort()
+					}
 				}
 			}
 		}
@@ -109,6 +122,9 @@ func addUserID(c *gin.Context, user *clerk.User) error {
 	userInfo, err := models.GetUserByClerkID(user.ID)
 	if err != nil {
 		return err
+	}
+	if userInfo.UserID == 0 {
+		return errors.New("Failed to get User ID")
 	}
 
 	currPrivMetadata := make(map[string]interface{})

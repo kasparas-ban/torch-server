@@ -28,6 +28,20 @@ type ExistingUser struct {
 	Country o.NullString `json:"country"`
 }
 
+type FullUser struct {
+	UserID       uint64       `json:"userID"`
+	PublicUserID string       `json:"publicUserID"`
+	ClerkID      string       `json:"-"`
+	Username     string       `json:"username"`
+	Email        string       `json:"email"`
+	Birthday     o.NullString `json:"birthday"`
+	Gender       o.NullString `json:"gender"`
+	City         o.NullString `json:"city,omitempty"`
+	Description  o.NullString `json:"description,omitempty"`
+	UpdatedAt    string       `json:"-"`
+	CreatedAt    string       `json:"createdAt"`
+}
+
 type NewUser struct {
 	Username    string       `json:"username" validate:"required,gt=5,lt=21"`
 	Email       string       `json:"email" validate:"required,email"`
@@ -39,13 +53,12 @@ type NewUser struct {
 }
 
 type UpdateUserReq struct {
-	PublicUserID string       `json:"userID" validate:"required"`
-	Username     string       `json:"username" validate:"required,gt=5,lt=21"`
-	Birthday     o.NullString `json:"birthday"`
-	Gender       o.NullString `json:"gender"`
-	City         o.NullString `json:"city"`
-	Description  o.NullString `json:"description"`
-	CountryCode  o.NullString `json:"countryCode" validate:"lt=3"`
+	Username    string       `json:"username" validate:"required,gt=5,lt=21"`
+	Birthday    o.NullString `json:"birthday"`
+	Gender      o.NullString `json:"gender"`
+	City        o.NullString `json:"city"`
+	Description o.NullString `json:"description"`
+	CountryCode o.NullString `json:"countryCode" validate:"lt=3"`
 }
 
 func (u *NewUser) Validate() error {
@@ -91,10 +104,10 @@ func GetUserInfo(userID uint64) (ExistingUser, error) {
 	return user, err
 }
 
-func GetUserByClerkID(clerkID string) (ExistingUser, error) {
-	var user ExistingUser
+func GetUserByClerkID(clerkID string) (FullUser, error) {
+	var user FullUser
 	err := db.GetDB().Raw(`
-		SELECT u.public_user_id, u.clerk_id, u.username, u.email, u.birthday, u.gender, c.country, u.city, u.description, u.created_at 
+		SELECT u.user_id, u.public_user_id, u.clerk_id, u.username, u.email, u.birthday, u.gender, c.country, u.city, u.description, u.created_at 
 		FROM users u
 		LEFT JOIN countries c ON u.country_id = c.country_id
 		WHERE u.clerk_id = ? LIMIT 1

@@ -30,14 +30,19 @@ func SetupRouter(logging, useAuth bool) *gin.Engine {
 
 func RegisterRoutes(r *gin.Engine, useAuth bool) *gin.Engine {
 	r.Use(CORSMiddleware())
+
+	public := r.Group("/api")
 	if useAuth {
-		r.Use(auth.AuthMiddleware())
+		public.Use(auth.AuthMiddleware(true))
 	}
+	public.POST("/add-user", users.HandleAddNewUser)
 
 	api := r.Group("/api")
+	if useAuth {
+		api.Use(auth.AuthMiddleware(false))
+	}
 	{
 		api.GET("/user-info", users.HandleGetUserInfo)
-		api.POST("/add-user", users.HandleAddNewUser)
 		api.PUT("/update-user", users.HandleUpdateUser)
 		api.DELETE("/delete-user", users.HandleDeleteUser)
 

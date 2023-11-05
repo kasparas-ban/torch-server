@@ -10,8 +10,7 @@ import (
 )
 
 func HandleGetAllItems(c *gin.Context) {
-	userID := uint64(1)
-	// userID := c.GetUint64("userID")
+	userID := c.GetUint64("userID")
 	if userID == 0 {
 		c.JSON(
 			http.StatusBadRequest,
