@@ -54,7 +54,7 @@ func TestAddUser(t *testing.T) {
 	assert.Equal(t, requestBody.Email, addedUser.Email)
 	assert.Equal(t, requestBody.Birthday, addedUser.Birthday)
 	assert.Equal(t, requestBody.Gender, addedUser.Gender)
-	assert.NotEmpty(t, addedUser.Country)
+	assert.NotEmpty(t, addedUser.CountryCode)
 	assert.Equal(t, requestBody.City, addedUser.City)
 	assert.Equal(t, requestBody.Description, addedUser.Description)
 
@@ -76,7 +76,7 @@ func TestAddUser(t *testing.T) {
 	assert.Equal(t, requestBody.Email, user.Email)
 	assert.Equal(t, requestBody.Birthday, user.Birthday)
 	assert.Equal(t, requestBody.Gender, user.Gender)
-	assert.NotEmpty(t, user.Country.Val)
+	assert.NotEmpty(t, user.CountryCode.Val)
 	assert.Equal(t, requestBody.City, user.City)
 	assert.Equal(t, requestBody.Description, user.Description)
 
