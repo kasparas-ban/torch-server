@@ -44,6 +44,7 @@ func RegisterRoutes(r *gin.Engine, useAuth bool) *gin.Engine {
 	{
 		api.GET("/user-info", users.HandleGetUserInfo)
 		api.PUT("/update-user", users.HandleUpdateUser)
+		api.PUT("/update-user-email", users.HandleUpdateUserEmail)
 		api.DELETE("/delete-user", users.HandleDeleteUser)
 
 		api.GET("/items", items.HandleGetAllItems)

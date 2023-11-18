@@ -46,3 +46,34 @@ func HandleUpdateUser(c *gin.Context) {
 
 	c.JSON(http.StatusOK, updatedUser)
 }
+
+func HandleUpdateUserEmail(c *gin.Context) {
+	var userEmail m.UpdateUserEmailReq
+	if err := c.BindJSON(&userEmail); err != nil {
+		c.AbortWithStatusJSON(
+			http.StatusBadRequest,
+			gin.H{"error": "Invalid request object"},
+		)
+		return
+	}
+
+	userID, err := a.GetUserID(c)
+	if err != nil {
+		c.AbortWithStatusJSON(
+			http.StatusInternalServerError,
+			gin.H{"error": err.Error()},
+		)
+		return
+	}
+
+	updatedUser, err := m.UpdateUserEmail(userID, userEmail)
+	if err != nil {
+		c.AbortWithStatusJSON(
+			http.StatusInternalServerError,
+			gin.H{"error": "Failed to update user email"},
+		)
+		return
+	}
+
+	c.JSON(http.StatusOK, updatedUser)
+}

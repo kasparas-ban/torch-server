@@ -62,6 +62,10 @@ type UpdateUserReq struct {
 	Description o.NullString `json:"description"`
 }
 
+type UpdateUserEmailReq struct {
+	Email string `json:"email" validate:"email"`
+}
+
 func (u *NewUser) Validate() error {
 	if err := Validate.Struct(u); err != nil {
 		return err
@@ -181,6 +185,37 @@ func UpdateUser(userID uint64, u UpdateUserReq) (ExistingUser, error) {
 			SET username = ?, birthday = ?, gender = ?, country_id = ?, city = ?, description = ? 
 			WHERE user_id = ?
 		`, u.Username, u.Birthday, u.Gender, countryId, u.City, u.Description, userID).Error
+		if err != nil {
+			return err
+		}
+
+		// Select updated user
+		err = tx.Raw(`
+			SELECT u.public_user_id, u.clerk_id, u.username, u.email, u.birthday, u.gender, c.country_code, u.city, u.description, u.created_at 
+			FROM users u
+			LEFT JOIN countries c ON u.country_id = c.country_id
+			WHERE u.user_id = ? LIMIT 1;
+		`, userID).Scan(&updatedUser).Error
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	return updatedUser, err
+}
+
+func UpdateUserEmail(userID uint64, u UpdateUserEmailReq) (ExistingUser, error) {
+	var updatedUser ExistingUser
+
+	err := db.GetDB().Transaction(func(tx *gorm.DB) error {
+		// Update user
+		err := tx.Exec(`
+			UPDATE users 
+			SET email = ?
+			WHERE user_id = ?
+		`, u.Email, userID).Error
 		if err != nil {
 			return err
 		}
