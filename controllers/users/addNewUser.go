@@ -43,5 +43,15 @@ func HandleAddNewUser(c *gin.Context) {
 		return
 	}
 
+	setClerkMetadata, exists := c.Get("setClerkMetadata")
+	setClerkFunc, ok := setClerkMetadata.(func() error)
+	if ok && exists && setClerkFunc() != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{"error": "Unexpected error occured"},
+		)
+		c.Abort()
+	}
+
 	c.JSON(http.StatusOK, user)
 }

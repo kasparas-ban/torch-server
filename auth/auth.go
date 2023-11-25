@@ -58,6 +58,9 @@ func AuthMiddleware(isNewUser bool) gin.HandlerFunc {
 		}
 
 		c.Set("clerkID", user.ID)
+		c.Set("setClerkMetadata", func() error {
+			return addUserID(c, user)
+		})
 
 		if !isNewUser {
 			// Read userID

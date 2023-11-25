@@ -6,6 +6,7 @@ import (
 	o "torch/torch-server/optional"
 	"torch/torch-server/util"
 
+	"github.com/go-sql-driver/mysql"
 	"gorm.io/gorm"
 )
 
@@ -143,6 +144,11 @@ func AddUser(clerkID string, u NewUser) (ExistingUser, error) {
 		err = tx.Exec(`
 			INSERT INTO users (public_user_id, clerk_id, username, email, birthday, gender, country_id, city, description) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
 		`, publicUserID, clerkID, u.Username, u.Email, u.Birthday, u.Gender, countryId, u.City, u.Description).Error
+
+		var mysqlErr *mysql.MySQLError
+		if errors.As(err, &mysqlErr) && mysqlErr.Number == 1062 {
+			return errors.New("User already exists")
+		}
 		if err != nil {
 			return err
 		}
