@@ -282,7 +282,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `idx_public_user_id` (`public_user_id`),
-  INDEX `idx_clerk_id` (`clerk_id`)
+  UNIQUE KEY `idx_clerk_id` (`clerk_id`)
 )
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb4
