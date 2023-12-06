@@ -66,7 +66,6 @@ func AuthMiddleware(isNewUser bool) gin.HandlerFunc {
 			// Read userID
 			userIDString := user.PrivateMetadata.(map[string]interface{})[userID_metadata]
 			if userIDString == nil {
-				fmt.Printf("\n\n METADATA NULL \n\n")
 				err := addUserID(c, user)
 				if err != nil {
 					c.JSON(
@@ -77,7 +76,6 @@ func AuthMiddleware(isNewUser bool) gin.HandlerFunc {
 				}
 			} else {
 				userID, err := strconv.ParseUint(userIDString.(string), 10, 64)
-				fmt.Printf("\n\n METADATA EXISTS %v \n\n", userID)
 				if err == nil {
 					c.Set(userID_context, userID)
 				} else {
@@ -116,7 +114,7 @@ func GetClerkID(c *gin.Context) string {
 func GetUserID(c *gin.Context) (uint64, error) {
 	userID := c.GetUint64(userID_context)
 	if userID == 0 {
-		return 0, errors.New("Failed to get user ID")
+		return 0, errors.New("failed to get user ID")
 	}
 	return userID, nil
 }
@@ -127,7 +125,7 @@ func addUserID(c *gin.Context, user *clerk.User) error {
 		return err
 	}
 	if userInfo.UserID == 0 {
-		return errors.New("Failed to get User ID")
+		return errors.New("failed to get User ID")
 	}
 
 	currPrivMetadata := make(map[string]interface{})
