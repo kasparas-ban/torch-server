@@ -1,24 +1,33 @@
 package users
 
 import (
+	"encoding/json"
 	"net/http"
-	m "torch/torch-server/models"
+	"torch/torch-server/models"
 
 	"github.com/gin-gonic/gin"
 )
 
+type EmailAddresses struct {
+	EmailAddress string `json:"email_address"`
+}
+
+type NewReqData struct {
+	ID             string           `json:"id"`
+	Username       string           `json:"username"`
+	EmailAddresses []EmailAddresses `gorm:"embedded" json:"email_addresses"`
+}
+
+type NewUserReq struct {
+	Data NewReqData `gorm:"embedded" json:"data"`
+}
+
 func HandleAddNewUser(c *gin.Context) {
-	clerkID := c.GetString("clerkID")
-	if clerkID == "" {
-		c.AbortWithStatusJSON(
-			http.StatusBadRequest,
-			gin.H{"error": "Could not find clerkID"},
-		)
-		return
-	}
+	decoder := json.NewDecoder(c.Request.Body)
 
-	var userReq m.NewUser
-	if err := c.BindJSON(&userReq); err != nil {
+	var data NewUserReq
+	err := decoder.Decode(&data)
+	if err != nil {
 		c.AbortWithStatusJSON(
 			http.StatusBadRequest,
 			gin.H{"error": "Invalid user object"},
@@ -26,15 +35,12 @@ func HandleAddNewUser(c *gin.Context) {
 		return
 	}
 
-	if err := userReq.Validate(); err != nil {
-		c.AbortWithStatusJSON(
-			http.StatusBadRequest,
-			gin.H{"error": "Invalid user object"},
-		)
-		return
+	newUser := models.NewUser{
+		ClerkID: data.Data.ID,
+		Email:   data.Data.EmailAddresses[0].EmailAddress,
 	}
 
-	user, err := m.AddUser(clerkID, userReq)
+	user, err := models.AddUser(newUser)
 	if err != nil {
 		c.AbortWithStatusJSON(
 			http.StatusInternalServerError,

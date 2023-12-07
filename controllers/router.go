@@ -32,30 +32,29 @@ func RegisterRoutes(r *gin.Engine, useAuth bool) *gin.Engine {
 	r.Use(CORSMiddleware())
 
 	public := r.Group("/api")
-	if useAuth {
-		public.Use(auth.AuthMiddleware(true))
+	{
+		public.POST("/add-user", users.HandleAddNewUser)
 	}
-	public.POST("/add-user", users.HandleAddNewUser)
 
-	api := r.Group("/api")
+	private := r.Group("/api")
 	if useAuth {
-		api.Use(auth.AuthMiddleware(false))
+		private.Use(auth.AuthMiddleware(false))
 	}
 	{
-		api.GET("/user-info", users.HandleGetUserInfo)
-		api.PUT("/update-user", users.HandleUpdateUser)
-		api.PUT("/update-user-email", users.HandleUpdateUserEmail)
-		api.DELETE("/delete-user", users.HandleDeleteUser)
+		private.GET("/user-info", users.HandleGetUserInfo)
+		private.PUT("/update-user", users.HandleUpdateUser)
+		private.PUT("/update-user-email", users.HandleUpdateUserEmail)
+		private.DELETE("/delete-user", users.HandleDeleteUser)
 
-		api.GET("/items", items.HandleGetAllItems)
-		api.GET("/item/:itemID", items.HandleGetItem)
-		api.POST("/add-item/:type", items.HandleAddItem)
-		api.DELETE("/remove-item/:itemID", items.HandleRemoveItem)
-		api.PUT("/update-item/:type", items.HandleUpdateItem)
-		api.PUT("/update-item-progress", items.HandleUpdateItemProgress)
+		private.GET("/items", items.HandleGetAllItems)
+		private.GET("/item/:itemID", items.HandleGetItem)
+		private.POST("/add-item/:type", items.HandleAddItem)
+		private.DELETE("/remove-item/:itemID", items.HandleRemoveItem)
+		private.PUT("/update-item/:type", items.HandleUpdateItem)
+		private.PUT("/update-item-progress", items.HandleUpdateItemProgress)
 
-		api.GET("/timer-history", history.HandleGetTimerHistory)
-		api.PUT("/add-timer-record", history.HandleUpsertTimerHistory)
+		private.GET("/timer-history", history.HandleGetTimerHistory)
+		private.PUT("/add-timer-record", history.HandleUpsertTimerHistory)
 	}
 
 	return r

@@ -45,13 +45,9 @@ type FullUser struct {
 }
 
 type NewUser struct {
-	Username    string       `json:"username" validate:"required,gt=5,lt=21"`
-	Email       string       `json:"email" validate:"required,email"`
-	Birthday    o.NullString `json:"birthday"`
-	Gender      o.NullString `json:"gender"`
-	CountryCode o.NullString `json:"countryCode" validate:"lt=3"`
-	City        o.NullString `json:"city"`
-	Description o.NullString `json:"description"`
+	ClerkID  string
+	Email    string
+	Username string
 }
 
 type UpdateUserReq struct {
@@ -65,22 +61,6 @@ type UpdateUserReq struct {
 
 type UpdateUserEmailReq struct {
 	Email string `json:"email" validate:"email"`
-}
-
-func (u *NewUser) Validate() error {
-	if err := Validate.Struct(u); err != nil {
-		return err
-	}
-
-	if u.Gender.IsValid && (u.Gender.Val != "MALE" && u.Gender.Val != "FEMALE" && u.Gender.Val != "OTHER") {
-		return errors.New("incorrect gender value")
-	}
-
-	if u.CountryCode.IsValid && (len(u.CountryCode.Val) > 2) {
-		return errors.New("incorrect country code value")
-	}
-
-	return nil
 }
 
 func (u *UpdateUserReq) Validate() error {
@@ -121,7 +101,7 @@ func GetUserByClerkID(clerkID string) (FullUser, error) {
 	return user, err
 }
 
-func AddUser(clerkID string, u NewUser) (ExistingUser, error) {
+func AddUser(u NewUser) (ExistingUser, error) {
 	var newUser ExistingUser
 	publicUserID, err := util.New()
 	if err != nil {
@@ -129,21 +109,10 @@ func AddUser(clerkID string, u NewUser) (ExistingUser, error) {
 	}
 
 	err = db.GetDB().Transaction(func(tx *gorm.DB) error {
-		// Get country ID
-		var countryId o.NullUint
-		if u.CountryCode.IsValid && u.CountryCode.Val != "" {
-			err := tx.Raw(`
-				SELECT country_id FROM countries WHERE country_code = ?
-			`, u.CountryCode.Val).Scan(&countryId).Error
-			if err != nil {
-				return err
-			}
-		}
-
 		// Add user
 		err = tx.Exec(`
-			INSERT INTO users (public_user_id, clerk_id, username, email, birthday, gender, country_id, city, description) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-		`, publicUserID, clerkID, u.Username, u.Email, u.Birthday, u.Gender, countryId, u.City, u.Description).Error
+			INSERT INTO users (public_user_id, clerk_id, username, email) VALUES (?, ?, ?, ?)
+		`, publicUserID, u.ClerkID, u.Username, u.Email).Error
 
 		var mysqlErr *mysql.MySQLError
 		if errors.As(err, &mysqlErr) && mysqlErr.Number == 1062 {
