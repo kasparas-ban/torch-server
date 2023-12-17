@@ -35,6 +35,14 @@ func HandleAddNewUser(c *gin.Context) {
 		return
 	}
 
+	if data.Data.ID == "" || len(data.Data.EmailAddresses) == 0 {
+		c.AbortWithStatusJSON(
+			http.StatusBadRequest,
+			gin.H{"error": "Invalid user object"},
+		)
+		return
+	}
+
 	newUser := models.NewUser{
 		ClerkID: data.Data.ID,
 		Email:   data.Data.EmailAddresses[0].EmailAddress,
@@ -51,7 +59,7 @@ func HandleAddNewUser(c *gin.Context) {
 
 	setClerkMetadata, exists := c.Get("setClerkMetadata")
 	setClerkFunc, ok := setClerkMetadata.(func() error)
-	if ok && exists && setClerkFunc() != nil {
+	if !ok || !exists || setClerkFunc() != nil {
 		c.JSON(
 			http.StatusInternalServerError,
 			gin.H{"error": "Unexpected error occured"},

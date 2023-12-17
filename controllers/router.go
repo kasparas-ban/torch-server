@@ -5,6 +5,7 @@ import (
 	"torch/torch-server/auth"
 	"torch/torch-server/controllers/history"
 	"torch/torch-server/controllers/items"
+	"torch/torch-server/controllers/notify"
 	"torch/torch-server/controllers/users"
 	"torch/torch-server/models"
 
@@ -34,6 +35,7 @@ func RegisterRoutes(r *gin.Engine, useAuth bool) *gin.Engine {
 	public := r.Group("/api")
 	{
 		public.POST("/add-user", users.HandleAddNewUser)
+		public.POST("/notify", notify.HandleNotifyEmail)
 	}
 
 	private := r.Group("/api")

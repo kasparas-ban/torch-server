@@ -58,6 +58,7 @@ func AuthMiddleware(isNewUser bool) gin.HandlerFunc {
 		}
 
 		c.Set("clerkID", user.ID)
+		c.Set("clerkData", client)
 		c.Set("setClerkMetadata", func() error {
 			return addUserID(c, user)
 		})
@@ -70,7 +71,7 @@ func AuthMiddleware(isNewUser bool) gin.HandlerFunc {
 				if err != nil {
 					c.JSON(
 						http.StatusInternalServerError,
-						gin.H{"error": "Unexpected error occured"},
+						gin.H{"error": "User not found"},
 					)
 					c.Abort()
 				}
@@ -83,7 +84,7 @@ func AuthMiddleware(isNewUser bool) gin.HandlerFunc {
 					if err != nil {
 						c.JSON(
 							http.StatusInternalServerError,
-							gin.H{"error": "Unexpected error occured"},
+							gin.H{"error": "User not found"},
 						)
 						c.Abort()
 					}
