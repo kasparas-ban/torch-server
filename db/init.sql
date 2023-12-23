@@ -306,6 +306,7 @@ CREATE TABLE IF NOT EXISTS `items` (
   `rec_progress` INT UNSIGNED,
   `rec_updated_at` TIMESTAMP DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   `parent_id` VARCHAR(12),
+  `status` ENUM('ACTIVE', 'ARCHIVED') DEFAULT 'ACTIVE',
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`item_id`),
   UNIQUE KEY `idx_public_item_id` (`public_item_id`),
@@ -403,7 +404,7 @@ BEGIN
     SET @last_id = LAST_INSERT_ID();
 
     -- Select the updated item
-		SELECT `public_item_id`, `title`, `type`, `target_date`, `priority`, `duration`, `rec_times`, `rec_period`, `rec_progress`, `parent_id`, `time_spent`, `created_at`
+		SELECT `public_item_id`, `title`, `type`, `target_date`, `priority`, `duration`, `rec_times`, `rec_period`, `rec_progress`, `parent_id`, `time_spent`, `status`, `created_at`
 		FROM `items` 
     WHERE `item_id` = @last_id;
 
@@ -413,7 +414,7 @@ END;
 DELIMITER ;
 
 DELIMITER //
-CREATE PROCEDURE UpdateItem(IN `userID` BIGINT UNSIGNED, `publicItemID` VARCHAR(12) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci, `newTitle` VARCHAR(255), `newTargetDate` DATE, `newPriority` ENUM('LOW', 'MEDIUM', 'HIGH'), `newDuration` INT UNSIGNED, `newRecTimes` INT UNSIGNED, `newRecProgress` INT UNSIGNED, `newRecPeriod` ENUM('WEEK', 'DAY', 'MONTH'), `newParentID` VARCHAR(12) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci)
+CREATE PROCEDURE UpdateItem(IN `userID` BIGINT UNSIGNED, `publicItemID` VARCHAR(12) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci, `newTitle` VARCHAR(255), `newTargetDate` DATE, `newPriority` ENUM('LOW', 'MEDIUM', 'HIGH'), `newDuration` INT UNSIGNED, `newRecTimes` INT UNSIGNED, `newRecProgress` INT UNSIGNED, `newRecPeriod` ENUM('WEEK', 'DAY', 'MONTH'), `newStatus` ENUM('ACTIVE', 'ARCHIVED'), `newParentID` VARCHAR(12) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci)
 BEGIN
     DECLARE `itemID` BIGINT UNSIGNED;
 
@@ -432,12 +433,13 @@ BEGIN
       `rec_times` = `newRecTimes`,
       `rec_progress` = `newRecProgress`,
       `rec_period` = `newRecPeriod`,
+      `status` = `newStatus`,
       `parent_id` = `newParentID`
     WHERE
       `user_id` = `userID` AND `item_id` = `itemID`;
 
     -- Select the updated item
-		SELECT `public_item_id`, `title`, `type`, `target_date`, `priority`, `duration`, `rec_times`, `rec_period`, `rec_progress`, `parent_id`, `time_spent`, `created_at`
+		SELECT `public_item_id`, `title`, `type`, `target_date`, `priority`, `duration`, `rec_times`, `rec_period`, `rec_progress`, `parent_id`, `time_spent`, `status`, `created_at`
 		FROM `items` 
     WHERE `item_id` = `itemID`;
 

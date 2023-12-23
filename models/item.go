@@ -18,6 +18,7 @@ type Item struct {
 	Recurring    r.Recurring  `gorm:"embedded" json:"recurring,omitempty"`
 	ParentID     o.NullString `json:"parentID"`
 	TimeSpent    uint         `json:"timeSpent"`
+	Status       string       `json:"status"`
 	CreatedAt    string       `json:"createdAt"`
 }
 
@@ -80,7 +81,7 @@ type UpdateItemProgressReq struct {
 func GetAllItemsByUser(userID uint64) ([]Item, error) {
 	items := []Item{}
 	err := db.GetDB().Raw(`
-		SELECT public_item_id, title, type, target_date, priority, duration, rec_times, rec_period, rec_progress, rec_updated_at, parent_id, time_spent, created_at
+		SELECT public_item_id, title, type, target_date, priority, duration, rec_times, rec_period, rec_progress, rec_updated_at, parent_id, time_spent, status, created_at
 		FROM items WHERE user_id = ?
 	`, userID).Scan(&items).Error
 	return items, err
@@ -89,7 +90,7 @@ func GetAllItemsByUser(userID uint64) ([]Item, error) {
 func GetItemByUser(userID uint64, publicItemID string) (Item, error) {
 	var item Item
 	err := db.GetDB().Raw(`
-		SELECT public_item_id, title, type, target_date, priority, duration, rec_times, rec_period, rec_progress, rec_updated_at, parent_id, time_spent, created_at
+		SELECT public_item_id, title, type, target_date, priority, duration, rec_times, rec_period, rec_progress, rec_updated_at, parent_id, time_spent, status, created_at
 		FROM items WHERE user_id = ? AND public_item_id = ?
 	`, userID, publicItemID).Scan(&item).Error
 	return item, err
