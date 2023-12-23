@@ -20,6 +20,7 @@ type User struct {
 	Gender       o.NullString `json:"gender"`
 	City         o.NullString `json:"city,omitempty"`
 	Description  o.NullString `json:"description,omitempty"`
+	FocusTime    uint         `json:"focus_time"`
 	UpdatedAt    string       `json:"-"`
 	CreatedAt    string       `json:"createdAt"`
 }
@@ -40,6 +41,7 @@ type FullUser struct {
 	CountryCode  o.NullString `json:"countryCode"`
 	City         o.NullString `json:"city,omitempty"`
 	Description  o.NullString `json:"description,omitempty"`
+	FocusTime    uint         `json:"focus_time"`
 	UpdatedAt    string       `json:"-"`
 	CreatedAt    string       `json:"createdAt"`
 }
@@ -82,7 +84,7 @@ func (u *UpdateUserReq) Validate() error {
 func GetUserInfo(userID uint64) (ExistingUser, error) {
 	var user ExistingUser
 	err := db.GetDB().Raw(`
-		SELECT u.public_user_id, u.clerk_id, u.username, u.email, u.birthday, u.gender, c.country_code, u.city, u.description, u.created_at 
+		SELECT u.public_user_id, u.clerk_id, u.username, u.email, u.birthday, u.gender, c.country_code, u.city, u.description, u.focus_time, u.created_at 
 		FROM users u
 		LEFT JOIN countries c ON u.country_id = c.country_id
 		WHERE u.user_id = ? LIMIT 1
@@ -93,7 +95,7 @@ func GetUserInfo(userID uint64) (ExistingUser, error) {
 func GetUserByClerkID(clerkID string) (FullUser, error) {
 	var user FullUser
 	err := db.GetDB().Raw(`
-		SELECT u.user_id, u.public_user_id, u.clerk_id, u.username, u.email, u.birthday, u.gender, c.country_code, u.city, u.description, u.created_at 
+		SELECT u.user_id, u.public_user_id, u.clerk_id, u.username, u.email, u.birthday, u.gender, c.country_code, u.city, u.description, u.focus_time, u.created_at 
 		FROM users u
 		LEFT JOIN countries c ON u.country_id = c.country_id
 		WHERE u.clerk_id = ? LIMIT 1
@@ -124,7 +126,7 @@ func AddUser(u NewUser) (ExistingUser, error) {
 
 		// Select new user
 		err = tx.Raw(`
-			SELECT u.public_user_id, u.clerk_id, u.username, u.email, u.birthday, u.gender, c.country_code, u.city, u.description, u.created_at 
+			SELECT u.public_user_id, u.clerk_id, u.username, u.email, u.birthday, u.gender, c.country_code, u.city, u.description, u.focus_time, u.created_at 
 			FROM users u
 			LEFT JOIN countries c ON u.country_id = c.country_id
 			WHERE u.user_id = LAST_INSERT_ID() LIMIT 1;
@@ -166,7 +168,7 @@ func UpdateUser(userID uint64, u UpdateUserReq) (ExistingUser, error) {
 
 		// Select updated user
 		err = tx.Raw(`
-			SELECT u.public_user_id, u.clerk_id, u.username, u.email, u.birthday, u.gender, c.country_code, u.city, u.description, u.created_at 
+			SELECT u.public_user_id, u.clerk_id, u.username, u.email, u.birthday, u.gender, c.country_code, u.city, u.description, u.focus_time, u.created_at 
 			FROM users u
 			LEFT JOIN countries c ON u.country_id = c.country_id
 			WHERE u.user_id = ? LIMIT 1;
@@ -197,7 +199,7 @@ func UpdateUserEmail(userID uint64, u UpdateUserEmailReq) (ExistingUser, error) 
 
 		// Select updated user
 		err = tx.Raw(`
-			SELECT u.public_user_id, u.clerk_id, u.username, u.email, u.birthday, u.gender, c.country_code, u.city, u.description, u.created_at 
+			SELECT u.public_user_id, u.clerk_id, u.username, u.email, u.birthday, u.gender, c.country_code, u.city, u.description, u.focus_time, u.created_at 
 			FROM users u
 			LEFT JOIN countries c ON u.country_id = c.country_id
 			WHERE u.user_id = ? LIMIT 1;

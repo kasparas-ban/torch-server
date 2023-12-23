@@ -172,3 +172,12 @@ func UpdateProgress(userID uint64, publicItemID string, timeSpent uint) error {
 	`, timeSpent, userID, publicItemID).Error
 	return err
 }
+
+func UpdateUserProgress(userID uint64, timeSpent uint) error {
+	err := db.GetDB().Exec(`
+		UPDATE users
+		SET focus_time = focus_time + ?
+		WHERE user_id = ?
+	`, timeSpent, userID).Error
+	return err
+}
