@@ -1,6 +1,7 @@
 package models
 
 import (
+	"errors"
 	"torch/torch-server/db"
 	o "torch/torch-server/optional"
 	r "torch/torch-server/recurring"
@@ -74,6 +75,13 @@ type ExistingDream struct {
 type UpdateItemProgressReq struct {
 	ItemID    uint64 `json:"itemID"`
 	TimeSpent uint   `json:"timeSpent"`
+}
+
+type UpdateItemStatusReq struct {
+	PublicItemID     string `json:"itemID"`
+	Status           string `json:"status"`
+	UpdateAssociated bool   `json:"updateAssociated"`
+	ItemType         string `json:"itemType"`
 }
 
 // === GET ===
@@ -153,11 +161,70 @@ func (item ExistingDream) UpdateItem(userID uint64) (Item, error) {
 	return updatedItem, err
 }
 
+// === UPDATE STATUS ===
+
+func UpdateItemStatus(userID uint64, body UpdateItemStatusReq) (Item, error) {
+	var updatedItem Item
+
+	if body.ItemType == "TASK" {
+		err := db.GetDB().Raw(`
+			UPDATE items
+			SET status = ?
+			WHERE user_id = ? AND public_item_id = ?
+		`, body.Status, userID, body.PublicItemID).Scan(&updatedItem).Error
+		return updatedItem, err
+	}
+
+	if body.ItemType == "GOAL" {
+		if body.UpdateAssociated {
+			err := db.GetDB().Raw(`
+				UPDATE items
+				SET status = ?
+				WHERE user_id = ? AND (
+					public_item_id = ? OR parent_id = ?
+				)
+			`, body.Status, userID, body.PublicItemID, body.PublicItemID).Scan(&updatedItem).Error
+			return updatedItem, err
+		} else {
+			err := db.GetDB().Raw(`
+			UPDATE items
+			SET status = ?
+			WHERE user_id = ? AND public_item_id = ?
+		`, body.Status, userID, body.PublicItemID).Scan(&updatedItem).Error
+			return updatedItem, err
+		}
+	}
+
+	if body.ItemType == "DREAM" {
+		if body.UpdateAssociated {
+			err := db.GetDB().Raw(`
+				UPDATE items
+				SET status = ?
+				WHERE user_id = ? AND (
+					public_item_id = ? OR 
+					parent_id = ? OR
+					parent_id IN (SELECT public_item_id FROM items WHERE parent_id = ?)
+				)
+			`, body.Status, userID, body.PublicItemID, body.PublicItemID, body.PublicItemID).Scan(&updatedItem).Error
+			return updatedItem, err
+		} else {
+			err := db.GetDB().Raw(`
+			UPDATE items
+			SET status = ?
+			WHERE user_id = ? AND public_item_id = ?
+		`, body.Status, userID, body.PublicItemID).Scan(&updatedItem).Error
+			return updatedItem, err
+		}
+	}
+
+	return updatedItem, errors.New("failed to update item status")
+}
+
 // === DELETE ===
 
 func RemoveItem(userID uint64, publicItemID string) error {
 	err := db.GetDB().Exec(`
-		CALL DeleteItem(?, ?)
+		CALL DeleteOneItem(?, ?)
 	`, userID, publicItemID).Error
 
 	return err
