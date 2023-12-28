@@ -18,17 +18,17 @@ func HandleRemoveItem(c *gin.Context) {
 		return
 	}
 
-	publicItemID := c.Param("itemID")
-	if publicItemID == "" {
+	var body m.DeleteItemStatusReq
+	if err := c.BindJSON(&body); err != nil {
 		c.JSON(
 			http.StatusBadRequest,
-			gin.H{"error": "Invalid item ID"},
+			gin.H{"error": "Invalid item object"},
 		)
 		c.Abort()
 		return
 	}
 
-	err = m.RemoveItem(userID, publicItemID)
+	err = m.RemoveItem(userID, body)
 	if err != nil {
 		c.JSON(
 			http.StatusInternalServerError,

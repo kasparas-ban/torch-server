@@ -51,7 +51,7 @@ func RegisterRoutes(r *gin.Engine, useAuth bool) *gin.Engine {
 		private.GET("/items", items.HandleGetAllItems)
 		private.GET("/item/:itemID", items.HandleGetItem)
 		private.POST("/add-item/:type", items.HandleAddItem)
-		private.DELETE("/remove-item/:itemID", items.HandleRemoveItem)
+		private.DELETE("/delete-item", items.HandleRemoveItem)
 		private.PUT("/update-item/:type", items.HandleUpdateItem)
 		private.PUT("/update-status", items.HandleUpdateItemStatus)
 		private.PUT("/update-item-progress", items.HandleUpdateItemProgress)

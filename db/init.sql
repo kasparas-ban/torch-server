@@ -414,7 +414,7 @@ END;
 DELIMITER ;
 
 DELIMITER //
-CREATE PROCEDURE UpdateItem(IN `userID` BIGINT UNSIGNED, `publicItemID` VARCHAR(12) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci, `newTitle` VARCHAR(255), `newTargetDate` DATE, `newPriority` ENUM('LOW', 'MEDIUM', 'HIGH'), `newDuration` INT UNSIGNED, `newRecTimes` INT UNSIGNED, `newRecProgress` INT UNSIGNED, `newRecPeriod` ENUM('WEEK', 'DAY', 'MONTH'), `newStatus` ENUM('ACTIVE', 'ARCHIVED'), `newParentID` VARCHAR(12) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci)
+CREATE PROCEDURE UpdateItem(IN `userID` BIGINT UNSIGNED, `publicItemID` VARCHAR(12) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci, `newTitle` VARCHAR(255), `newTargetDate` DATE, `newPriority` ENUM('LOW', 'MEDIUM', 'HIGH'), `newDuration` INT UNSIGNED, `newRecTimes` INT UNSIGNED, `newRecProgress` INT UNSIGNED, `newRecPeriod` ENUM('WEEK', 'DAY', 'MONTH'), `newParentID` VARCHAR(12) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci)
 BEGIN
     DECLARE `itemID` BIGINT UNSIGNED;
 
@@ -433,7 +433,6 @@ BEGIN
       `rec_times` = `newRecTimes`,
       `rec_progress` = `newRecProgress`,
       `rec_period` = `newRecPeriod`,
-      `status` = `newStatus`,
       `parent_id` = `newParentID`
     WHERE
       `user_id` = `userID` AND `item_id` = `itemID`;
@@ -451,15 +450,35 @@ DELIMITER ;
 DELIMITER //
 CREATE PROCEDURE DeleteOneItem(IN `userID` BIGINT UNSIGNED, `publicItemID` VARCHAR(12) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci)
 BEGIN
-    DECLARE `itemID` BIGINT UNSIGNED;
-
     START TRANSACTION;
-
-    SELECT `item_id` INTO `itemID` FROM `items` WHERE `public_item_id` = `publicItemID`;
     
-    DELETE FROM `items` WHERE `user_id` = `userID` AND `item_id` = `itemID`;
+    DELETE FROM `items` WHERE `user_id` = `userID` AND `public_item_id` = `publicItemID`;
 
     UPDATE `items` SET `parent_id` = NULL WHERE `user_id` = `userID` AND `parent_id` = `publicItemID`;
+
+    COMMIT;
+END;
+//
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE DeleteGoalAll(IN `userID` BIGINT UNSIGNED, `publicItemID` VARCHAR(12) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci)
+BEGIN
+    START TRANSACTION;
+    
+    DELETE FROM `items` WHERE `user_id` = `userID` AND (`public_item_id` = `publicItemID` OR `parent_id` = `publicItemID`)
+
+    COMMIT;
+END;
+//
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE DeleteDreamAll(IN `userID` BIGINT UNSIGNED, `publicItemID` VARCHAR(12) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci)
+BEGIN
+    START TRANSACTION;
+    
+    DELETE FROM `items` WHERE `user_id` = `userID` AND (`public_item_id` = `publicItemID` OR `parent_id` = `publicItemID` OR `parent_id` IN (SELECT `public_item_id` FROM `items` WHERE `parent_id` = `publicItemID`))
 
     COMMIT;
 END;

@@ -84,6 +84,12 @@ type UpdateItemStatusReq struct {
 	ItemType         string `json:"itemType"`
 }
 
+type DeleteItemStatusReq struct {
+	PublicItemID     string `json:"itemID"`
+	ItemType         string `json:"itemType"`
+	DeleteAssociated bool   `json:"deleteAssociated"`
+}
+
 // === GET ===
 
 func GetAllItemsByUser(userID uint64) ([]Item, error) {
@@ -222,12 +228,29 @@ func UpdateItemStatus(userID uint64, body UpdateItemStatusReq) (Item, error) {
 
 // === DELETE ===
 
-func RemoveItem(userID uint64, publicItemID string) error {
-	err := db.GetDB().Exec(`
-		CALL DeleteOneItem(?, ?)
-	`, userID, publicItemID).Error
+func RemoveItem(userID uint64, body DeleteItemStatusReq) error {
+	if !body.DeleteAssociated || body.ItemType == "TASK" {
+		err := db.GetDB().Exec(`
+			CALL DeleteOneItem(?, ?)
+		`, userID, body.PublicItemID).Error
+		return err
+	}
 
-	return err
+	if body.ItemType == "GOAL" {
+		err := db.GetDB().Exec(`
+			CALL DeleteGoalAll(?, ?)
+		`, userID, body.PublicItemID).Error
+		return err
+	}
+
+	if body.ItemType == "DREAM" {
+		err := db.GetDB().Exec(`
+			CALL DeleteDreamAll(?, ?)
+		`, userID, body.PublicItemID).Error
+		return err
+	}
+
+	return errors.New("failed to delete item")
 }
 
 // === UPDATE PROGRESS ===
