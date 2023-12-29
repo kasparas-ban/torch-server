@@ -306,7 +306,7 @@ CREATE TABLE IF NOT EXISTS `items` (
   `rec_progress` INT UNSIGNED,
   `rec_updated_at` TIMESTAMP DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   `parent_id` VARCHAR(12),
-  `status` ENUM('ACTIVE', 'ARCHIVED') DEFAULT 'ACTIVE',
+  `status` ENUM('ACTIVE', 'COMPLETED', 'ARCHIVED') DEFAULT 'ACTIVE',
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`item_id`),
   UNIQUE KEY `idx_public_item_id` (`public_item_id`),
