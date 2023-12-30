@@ -451,9 +451,15 @@ DELIMITER //
 CREATE PROCEDURE DeleteOneItem(IN `userID` BIGINT UNSIGNED, `publicItemID` VARCHAR(12) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci)
 BEGIN
     START TRANSACTION;
+
+    -- Add spent time to user profile
+    UPDATE `users` 
+    SET `focus_time` = `focus_time` + (SELECT `time_spent` FROM `items` WHERE `user_id` = `userID` AND `public_item_id` = `publicItemID`);
     
+    -- Delete item
     DELETE FROM `items` WHERE `user_id` = `userID` AND `public_item_id` = `publicItemID`;
 
+    -- Update item children
     UPDATE `items` SET `parent_id` = NULL WHERE `user_id` = `userID` AND `parent_id` = `publicItemID`;
 
     COMMIT;
@@ -465,8 +471,16 @@ DELIMITER //
 CREATE PROCEDURE DeleteGoalAll(IN `userID` BIGINT UNSIGNED, `publicItemID` VARCHAR(12) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci)
 BEGIN
     START TRANSACTION;
+
+    -- Add spent time to user profile
+    UPDATE `users` 
+    SET `focus_time` = 
+      `focus_time` 
+      + (SELECT `time_spent` FROM `items` WHERE `user_id` = `userID` AND `public_item_id` = `publicItemID`)
+      + (SELECT `time_spent` FROM `items` WHERE `user_id` = `userID` AND `parent_id` = `publicItemID`);
     
-    DELETE FROM `items` WHERE `user_id` = `userID` AND (`public_item_id` = `publicItemID` OR `parent_id` = `publicItemID`)
+    -- Delete items
+    DELETE FROM `items` WHERE `user_id` = `userID` AND (`public_item_id` = `publicItemID` OR `parent_id` = `publicItemID`);
 
     COMMIT;
 END;
@@ -477,8 +491,22 @@ DELIMITER //
 CREATE PROCEDURE DeleteDreamAll(IN `userID` BIGINT UNSIGNED, `publicItemID` VARCHAR(12) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci)
 BEGIN
     START TRANSACTION;
+
+    -- Add spent time to user profile
+    UPDATE `users` 
+    SET `focus_time` = 
+      `focus_time` 
+      + (SELECT `time_spent` FROM `items` WHERE `user_id` = `userID` AND `public_item_id` = `publicItemID`)
+      + (SELECT `time_spent` FROM `items` WHERE `user_id` = `userID` AND `parent_id` = `publicItemID`)
+      + (SELECT `time_spent` FROM `items` WHERE `user_id` = `userID` AND `parent_id` IN (SELECT derived.public_item_id FROM (SELECT `public_item_id` FROM `items` WHERE `parent_id` = `publicItemID`) AS derived));
     
-    DELETE FROM `items` WHERE `user_id` = `userID` AND (`public_item_id` = `publicItemID` OR `parent_id` = `publicItemID` OR `parent_id` IN (SELECT `public_item_id` FROM `items` WHERE `parent_id` = `publicItemID`))
+    -- Delete items
+    DELETE FROM `items`
+    WHERE `user_id` = `userID` AND (
+        `public_item_id` = `publicItemID` OR 
+        `parent_id` = `publicItemID` OR
+        `parent_id` IN (SELECT derived.public_item_id FROM (SELECT `public_item_id` FROM `items` WHERE `parent_id` = `publicItemID`) AS derived)
+    );
 
     COMMIT;
 END;

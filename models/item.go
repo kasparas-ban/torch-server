@@ -209,7 +209,7 @@ func UpdateItemStatus(userID uint64, body UpdateItemStatusReq) (Item, error) {
 				WHERE user_id = ? AND (
 					public_item_id = ? OR 
 					parent_id = ? OR
-					parent_id IN (SELECT public_item_id FROM items WHERE parent_id = ?)
+					parent_id IN (SELECT derived.public_item_id FROM (SELECT public_item_id FROM items WHERE parent_id = ?) AS derived)
 				)
 			`, body.Status, userID, body.PublicItemID, body.PublicItemID, body.PublicItemID).Scan(&updatedItem).Error
 			return updatedItem, err
