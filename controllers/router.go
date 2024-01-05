@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"net/http"
 	"os"
 	"torch/torch-server/auth"
 	"torch/torch-server/controllers/history"
@@ -31,6 +32,10 @@ func SetupRouter(logging, useAuth bool) *gin.Engine {
 
 func RegisterRoutes(r *gin.Engine, useAuth bool) *gin.Engine {
 	r.Use(CORSMiddleware())
+
+	r.GET("/ping", func(c *gin.Context) {
+		c.AbortWithStatus(http.StatusOK)
+	})
 
 	public := r.Group("/api")
 	{
