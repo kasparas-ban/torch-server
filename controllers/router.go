@@ -37,13 +37,13 @@ func RegisterRoutes(r *gin.Engine, useAuth bool) *gin.Engine {
 		c.AbortWithStatus(http.StatusOK)
 	})
 
-	public := r.Group("/api")
+	public := r.Group("/")
 	{
 		public.POST("/add-user", users.HandleAddNewUser)
 		public.POST("/notify", notify.HandleNotifyEmail)
 	}
 
-	private := r.Group("/api")
+	private := r.Group("/")
 	if useAuth {
 		private.Use(auth.AuthMiddleware(false))
 	}
